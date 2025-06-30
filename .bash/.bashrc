@@ -462,19 +462,15 @@ __append_block_to_file() {
 }
 ww_prepare_bash() {
 __append_block_to_file "$HOME/.vimrc" \
-'if (filereadable("/root/.config/.bash/.vimrc"))
-    source /root/.config/.bash/.vimrc
+'if (filereadable("/root/.config/.ww/.bash/.vimrc"))
+    source /root/.config/.ww/.bash/.vimrc
 endif'
 __append_block_to_file "$HOME/.bashrc" \
 '# ∙ww
-alias src,,="source ~/.config/.bash/.bashrc"
+alias src,,="source ~/.config/.ww/.bash/.bashrc"
 HISTIGNORE=":  *:src,,:h:history:lfr*"
 '
     cd ~
-    mkdir --parents ~/.config/tmux/
-    if mv ~/.config/.bash/.tmux.conf ~/.config/tmux/; then
-        echo "moved .tmux.conf to ~/.config/tmux/"
-    fi
     if [ -f ~/lfrc_linux ]; then
         mv lfrc_linux lfrc && chmod 666 lfrc && mkdir --parents .config/lf/ && mv lfrc .config/lf/
         echo "moved lfrc_linux to ~/.config/lf/"
@@ -600,7 +596,7 @@ __source_file() {
     __source_file  ~/.config/.bash/.PS1
     __source_file  ~/.config/.bash/.git_funcs
 alias echo,,='printf "\n\n\n\n\n\n\n\n\n\n"'
-alias nn='/root/.config/nr_setupTool_k8s.sh'
+alias nn='/root/.config/.ww/nr_setupTool_k8s.sh'
 
 # === para#bash#.shared_bash#.commonFuncs.sh ===
 #!/bin/bash
@@ -1661,7 +1657,7 @@ alias version='head /etc/os-release'
 export TIME_STYLE=long-iso
 HISTIGNORE=":  *:src,,:psef *:h:hh:history:[ ]*ls[ ]*:ls:ll:clear -x:clear:clr:pwd:version:date:[ ]*vim *:[ ]*alias *:alias:lfr*"
 export HISTCONTROL=ignoredups:erasedups:ignorespace
-export HISTFILE="/root/.config/.bash/.bash_history"
+export HISTFILE="/root/.config/.ww/.bash/.bash_history"
 shopt -s histappend                      # append, don't overwrite history
 PROMPT_COMMAND='history -a; history -n'  # save/load history in prompt cycle
 
