@@ -139,3 +139,24 @@ cd /var/log/pw-share/pods/stack/ && mv cunode01/prvt cunode01/prvtTmp && mv duno
 tshark -r $PCAP  -Y '!(ip.src == 127.0.0.1 || ip.dst == 127.0.0.1)' |  awk '{printf "%5s | %s | %12s | %13s:%-5s >>> %13s:%-5s |", $1, $2, $3, $4, $5, $6, $7; for(i=8;i<=NF;++i) printf " %s", $i; printf "\n"}' > $OUTPCAP
 kubectl edit configmap -n pw stack-configmap-cunode01   # deploy change in deploy time
 kubectl edit configmap -n pw stack-configmap-cunode01   # check E2_LOCAL_ADDRESS
+ww_big_menu
+ww_choose_version
+ww_cksum_nrstack_prvt
+ww_cp_nrstack
+ww_elapsed_time_
+ww_elapsed_time_4G
+ww_elapsed_time_extend
+ww_elapsed_time_watch_try
+ww_fault
+ww_get_manifest_list_from_smo_nr_dev
+ww_messages
+ww_nrstack
+ww_prepare_bash
+ww_ric_indication_show
+ww_show_file_descriptors
+ww_show_os_amd_arm_intel
+ww_show_os_info_hardware_etc
+ww_show_os_info_release_etc
+ww_show_stats
+ww_signal
+ww_wdg_mdg_more

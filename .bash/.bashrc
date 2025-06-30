@@ -255,13 +255,13 @@ if [[ $TERM_NAME == "cygwin" || "MobaX" == $TERM_NAME ]]; then
     CD_DIR_FILE="/$TERM_ROOT/c/ws/cygwin64/home/bashrc_s/cd_location/_cd_directory_fzf.sh"
     OTHER_FILES=(C:/ws/para/tags C:/ws/para/bash/.shared_bash/.vars $MOBA_SSH_SETUPS_GREPED)
 else
-    FUNCS_FILE____ORG="$HOME/.config/.bash/.funcs01.sh"                # for athena etc
-    FUNCS_FILE_GREPED="$HOME/.config/.bash/.funcs01_greped"
-    COMMANDS_FILE_GREPED="$HOME/.config/.bash/_commands_for_fzf_greped.sh"
-    COMMANDS_FILE_REMOTE____ORG="$HOME/.config/.bash/.commands_for_fzf.sh"
-    COMMANDS_FILE_REMOTE_GREPED="$HOME/.config/.bash/.commands_for_fzf_greped.sh"
-    CD_DIR_FILE="$HOME/.config/.bash/.cd_directory_fzf.sh"
-    OTHER_FILES=($HOME/.config/.bash/.vars)
+    FUNCS_FILE____ORG="$HOME/.config/.ww/.bash/.funcs01.sh"                # for athena etc
+    FUNCS_FILE_GREPED="$HOME/.config/.ww/.bash/.funcs01_greped"
+    COMMANDS_FILE_GREPED="$HOME/.config/.ww/.bash/_commands_for_fzf_greped.sh"
+    COMMANDS_FILE_REMOTE____ORG="$HOME/.config/.ww/.bash/.commands_for_fzf.sh"
+    COMMANDS_FILE_REMOTE_GREPED="$HOME/.config/.ww/.bash/.commands_for_fzf_greped.sh"
+    CD_DIR_FILE="$HOME/.config/.ww/.bash/.cd_directory_fzf.sh"
+    OTHER_FILES=($HOME/.config/.ww/.bash/.vars)
 fi
 EDIT_COMMAND_RENDER="edit_command"
 EDIT_COMMAND_RENDER="add_to_history"
