@@ -1714,6 +1714,7 @@ if [ -z "$HOSTNAME_SHORT" ]; then
 fi
 SERVER_IP=$(hostname -I | awk '{print $1}' 2>/dev/null || echo "IP??")
     if [ -f /.dockerenv ]; then IS_DOCKER="DOCKER"; else IS_DOCKER=""; fi
+    if [ ! -n "$TMUX" ]; then IS_TMUX="tmux"; else IS_TMUX=""; fi
 if [[ $HOSTNAME_SHORT == ildevdocker* ]]; then
     echo "hostname --short starts with 'ildevdocker'"
     PS1='\[\e[1;30;47m\] $SERVER_IP ● $(get_git_branch) ● #\#: $? ● \D{%H:%M:%S}'
@@ -1740,7 +1741,7 @@ else
     PS1='\[\e[1;30;46m\]● \h $SERVER_IP \[\e[1;30;47m\]● #\#: $? ● \D{%H:%M:%S}'
     PS1+='\[\e[0m\] \w/\n● →→'
 fi
-ps1_counter=1
+ps1_counter=2
 toggle_ps1()
 {
     let "ps1_counter++"
@@ -1748,13 +1749,16 @@ toggle_ps1()
         PS1='\[\e[1;30;47m\]● \D{%Y-%m-%d  %H:%M:%S} ● #\#: [$?] ●\[\e[0m\]        \[\e[1;30;46m\]● \h $STY $SERVER_IP \[\e[0m\]'
         PS1+='\n● \w/ →→→'
     elif (( 2 == ps1_counter )); then
-        PS1='\[\e[0;32m\]\w/ \[\e[0;31m\]($?) $IS_DOCKER\[\e[1;30;46m\] \h $STY $SERVER_IP \[\e[1;30;47m\] \D{%H:%M:%S}'
+        PS1='\[\e[0;32m\]\w/ \[\e[0;31m\]($?) $IS_TMUX $IS_DOCKER \[\e[1;30;46m\] \h $STY $SERVER_IP \[\e[1;30;47m\] \D{%H:%M:%S}'
         PS1+='\[\e[0m\]\n#\#● →→→'
+    elif (( 3 == ps1_counter )); then
+        PS1='\[\e[2;31m\]∟($?) \D{%H:%M:%S}\[\e[0;34m\] $IS_TMUX $IS_DOCKER\[\e[2;33m\] \h-$SERVER_IP'
+        PS1+='\n#\#● \[\e[0;32m\]$PWD \[\e[0m\]→→→'
     else
         PS1='\n#\#● →→→'
         let "ps1_counter=0"
     fi
-    printf "\n\n\n\n"
+    printf "\n    Current ps1_counter = $ps1_counter\n\n"
 }
 toggle_ps1 && echo "toggle_ps1 to change PS1"
 
