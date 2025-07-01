@@ -236,6 +236,29 @@ __tmux_kill_session() {
     w
     tmux ls
 }
+ww_tmux_session_prepare() {   # add: pods_start or BUILD
+    if [ ! -n "$TMUX" ]; then echo "Not inside tmux"; return; fi
+    if hash hostname -I 2>/dev/null; then
+        if ! SERVER_IP=$(hostname -I | awk '{print $1}') ; then SERVER_IP='??'; fi
+        if ! HOSTNAME_SHORT=$(hostname --short) ; then HOSTNAME_SHORT='??'; fi
+    else
+        printf "hostname -I not installed\n"
+    fi
+    echo "a) pods_start"
+    echo "b) BUILD"
+    read -n1 -p "Choose Option: " keys
+    echo ""
+    case "$keys" in
+        [Aa]* )
+            tmux rename-session "$HOSTNAME_SHORT pods_start"
+            ;;
+        [Bb]* )
+            tmux rename-session "$HOSTNAME_SHORT BUILD"
+            ;;
+        * )
+            echo "skipping..."
+    esac
+}
 
 # === cygwin64#home#bashrc_s#cd_location#fzf01.sh ===
 RED='\033[0;31m'
