@@ -238,22 +238,18 @@ __tmux_kill_session() {
 }
 ww_tmux_session_prepare() {   # add: pods_start or BUILD
     if [ ! -n "$TMUX" ]; then echo "Not inside tmux"; return; fi
-    if hash hostname -I 2>/dev/null; then
-        if ! SERVER_IP=$(hostname -I | awk '{print $1}') ; then SERVER_IP='??'; fi
-        if ! HOSTNAME_SHORT=$(hostname --short) ; then HOSTNAME_SHORT='??'; fi
-    else
-        printf "hostname -I not installed\n"
-    fi
+    local HOSTNAME_SHORT=$(hostname --short 2>/dev/null || echo "??")
+    local SERVER_IP=$(hostname -I | awk '{print $1}' 2>/dev/null || echo "IP??")
     echo "a) pods_start"
     echo "b) BUILD"
     read -n1 -p "Choose Option: " keys
     echo ""
     case "$keys" in
         [Aa]* )
-            tmux rename-session "$HOSTNAME_SHORT pods_start"
+            tmux rename-session "$SERVER_IP $HOSTNAME_SHORT pods_start"
             ;;
         [Bb]* )
-            tmux rename-session "$HOSTNAME_SHORT BUILD"
+            tmux rename-session "$SERVER_IP $HOSTNAME_SHORT BUILD"
             ;;
         * )
             echo "skipping..."
@@ -1712,12 +1708,11 @@ shopt -s histappend                      # append, don't overwrite history
 PROMPT_COMMAND='history -a; history -n'  # save/load history in prompt cycle
 
 # === para#bash#.shared_bash#.PS1 ===
-if hash hostname -I 2>/dev/null; then
-    if ! SERVER_IP=$(hostname -I | awk '{print $1}') ; then SERVER_IP='??'; fi
-    if ! HOSTNAME_SHORT=$(hostname --short) ; then HOSTNAME_SHORT='??'; fi
-else
-    printf "hostname -I not installed\n"
+HOSTNAME_SHORT=$(hostname --short 2>/dev/null)
+if [ -z "$HOSTNAME_SHORT" ]; then
+    HOSTNAME_SHORT="??"
 fi
+SERVER_IP=$(hostname -I | awk '{print $1}' 2>/dev/null || echo "IP??")
     if [ -f /.dockerenv ]; then IS_DOCKER="DOCKER"; else IS_DOCKER=""; fi
 if [[ $HOSTNAME_SHORT == ildevdocker* ]]; then
     echo "hostname --short starts with 'ildevdocker'"
