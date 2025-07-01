@@ -243,11 +243,34 @@ NC='\033[0m'
 BIRed='\033[1;91m'
 BGreen='\033[1;32m'
 CHOSEN_FZF=""
+____create_files_if_not_exist() {
+    local arr=($@)   # strings to array
+    for _file in "${arr[@]}"; do
+        if [ ! -f "$_file" ]; then
+            echo "touch $_file"
+            touch "$_file"
+            chmod 666 "$_file"
+        fi
+    done
+}
+____create_second_file_if_not_exist_and_touch_first() {
+    local FILE1="$1"
+    local FILE2="$2"
+    if [ ! -f "$FILE2" ]; then
+        echo "touch $FILE2 && sleep 2"
+        touch "$FILE2"
+        if [ ! -f "$FILE1" ]; then
+            echo "WHY $FILE1 not exist??"
+        fi
+        sleep 2
+        touch "$FILE1"
+    fi
+}
 if [[ $TERM_NAME == "cygwin" || "MobaX" == $TERM_NAME ]]; then
     GREP_DIR="/$TERM_ROOT/c/ws/cygwin64/home/bashrc_s/cd_location/.grepDir"
     FUNCS_FILE____ORG="/$TERM_ROOT/c/ws/para/bash/.shared_bash/.funcs01"
     FUNCS_FILE_GREPED="$GREP_DIR/.funcs01_greped"
-    COMMANDS_FILE__BKMRK="/$TERM_ROOT/c/gV82a/P/vimfilerBookmarksWs"
+    COMMANDS_FILE__BKMRK="/$TERM_ROOT/c/gV82a/P/vimfilerBookmarksWsEdit"
     COMMANDS_FILE____ORG="/$TERM_ROOT/c/ws/cygwin64/home/bashrc_s/cd_location/_commands_for_fzf.sh"
     COMMANDS_FILE_GREPED="$GREP_DIR/_commands_for_fzf_greped.sh"
     MOBA_SSH_SETUPS____ORG="/$TERM_ROOT/c/Users/wshabso/AppData/Roaming/MobaXterm/home/moba_ssh_setups.sh"
@@ -255,13 +278,16 @@ if [[ $TERM_NAME == "cygwin" || "MobaX" == $TERM_NAME ]]; then
     CD_DIR_FILE="/$TERM_ROOT/c/ws/cygwin64/home/bashrc_s/cd_location/_cd_directory_fzf.sh"
     OTHER_FILES=(C:/ws/para/tags C:/ws/para/bash/.shared_bash/.vars $MOBA_SSH_SETUPS_GREPED)
 else
-    FUNCS_FILE____ORG="$HOME/.config/.ww/.bash/.funcs01.sh"                # for athena etc
-    FUNCS_FILE_GREPED="$HOME/.config/.ww/.bash/.funcs01_greped"
-    COMMANDS_FILE_GREPED="$HOME/.config/.ww/.bash/_commands_for_fzf_greped.sh"
-    COMMANDS_FILE_REMOTE____ORG="$HOME/.config/.ww/.bash/.commands_for_fzf.sh"
-    COMMANDS_FILE_REMOTE_GREPED="$HOME/.config/.ww/.bash/.commands_for_fzf_greped.sh"
-    CD_DIR_FILE="$HOME/.config/.ww/.bash/.cd_directory_fzf.sh"
-    OTHER_FILES=($HOME/.config/.ww/.bash/.vars)
+    GREP_DIR="$HOME/.config/.ww/.bash"
+    FUNCS_FILE____ORG="$GREP_DIR/.bashrc"
+    FUNCS_FILE_GREPED="$GREP_DIR/.funcs01_greped"
+    COMMANDS_FILE_GREPED="$GREP_DIR/_commands_for_fzf_greped.sh"
+    COMMANDS_FILE_REMOTE____ORG="$GREP_DIR/.commands_for_fzf.sh"
+    COMMANDS_FILE_REMOTE_GREPED="$GREP_DIR/.commands_for_fzf_greped.sh"
+    CD_DIR_FILE="$GREP_DIR/.cd_directory_fzf.sh"
+    OTHER_FILES=($GREP_DIR/.vars)
+    ____create_second_file_if_not_exist_and_touch_first "$COMMANDS_FILE_REMOTE____ORG" "$COMMANDS_FILE_REMOTE_GREPED"
+    ____create_second_file_if_not_exist_and_touch_first "$FUNCS_FILE____ORG"           "$FUNCS_FILE_GREPED"
 fi
 EDIT_COMMAND_RENDER="edit_command"
 EDIT_COMMAND_RENDER="add_to_history"
@@ -296,8 +322,9 @@ __Refresh_Files() {
         is_refreshed="Y"
     fi
     if [ "$FUNCS_FILE____ORG" -nt "$FUNCS_FILE_GREPED" ]; then
-        echo "grep again on funcs file"
-        grep -E "^[a-z,A-Z,_]{4}" "$FUNCS_FILE____ORG" > "$FUNCS_FILE_GREPED"
+        echo "grep again on funcs file (try grep on functions)"
+        grep -E "^[a-z,A-Z,_]{4,}()" "$FUNCS_FILE____ORG" > "$FUNCS_FILE_GREPED"
+        sed -i 's/()//g; s/^function //g' "$FUNCS_FILE_GREPED"
         is_refreshed="Y"
     fi
     if __Refresh_Files_Commands "$COMMANDS_FILE____ORG"        "$COMMANDS_FILE_GREPED";        then is_refreshed="Y"; fi
