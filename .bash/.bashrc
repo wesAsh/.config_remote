@@ -210,17 +210,60 @@ try_this() {
 __g_output_for_fzf=""
 
 # === cygwin64#home#bashrc_s#.config#tmux_screen#tmux_01.sh ===
-__tmux_create_or_attach_to_session() {
+TMUX_CONF_PATH=""
+__tmux_create_or_attach_to_session_prev() {
     local SESSION_NAME="$1"
     if ! tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-        tmux new-session -d -s "$SESSION_NAME"
+        tmux -u new-session -d -s "$SESSION_NAME"
         if [ -f /root/.config/tmux/.tmux.conf ]; then
             tmux source-file /root/.config/tmux/.tmux.conf
         elif [ -f C:/ws/cygwin64/home/wshabso/.tmux.conf ]; then
             tmux source-file C:/ws/cygwin64/home/wshabso/.tmux.conf
+        elif [ -f /home/wshabso/.config/tmux/.tmux.conf ]; then
         fi
     fi
     tmux attach -t "$SESSION_NAME"
+}
+____get_tmux_conf_path() {
+    local file_path="/root/.config/tmux/.tmux.conf"
+    if [ -f "$file_path" ]; then 
+        TMUX_CONF_PATH="$file_path"
+        return
+    fi
+    file_path="C:/ws/cygwin64/home/wshabso/.tmux.conf"
+    if [ -f "$file_path" ]; then 
+        TMUX_CONF_PATH="$file_path"
+        return
+    fi
+    file_path="/home/wshabso/.config/tmux/.tmux.conf"
+    if [ -f "$file_path" ]; then 
+        TMUX_CONF_PATH="$file_path"
+        return
+    fi
+    return -1
+}
+__tmux_create_or_attach_to_session() {
+    local SESSION_NAME="$1"
+    tmux ls
+    local sessions=$(tmux list-sessions -F '#S' 2>/dev/null)
+    if [ -z "$sessions" ]; then
+        echo "No tmux sessions found"
+        if ! ____get_tmux_conf_path; then
+            echo "didnt found .tmux.conf !!!"
+            return -1
+        fi
+        echo "found .tmux.conf:  $TMUX_CONF_PATH"
+        sleep 4
+        tmux -f "$TMUX_CONF_PATH" -u  new-session -s "$SESSION_NAME"
+        return
+    fi
+    if [ "$(echo "$sessions" | wc -l)" -eq 1 ]; then
+        echo "found 1 session: $sessions"
+        sleep 4
+        tmux attach-session -t "$sessions"
+        return
+    fi
+    echo "found multiple sessions !!"
 }
 __tmux_kill_session() {
     local SESSION_NAME="$1"
@@ -246,10 +289,10 @@ ww_tmux_session_prepare() {   # add: pods_start or BUILD
     echo ""
     case "$keys" in
         [Aa]* )
-            tmux rename-session "$SERVER_IP $HOSTNAME_SHORT pods_start"
+            tmux rename-session "$SERVER_IP_$HOSTNAME_SHORT_pods_start"
             ;;
         [Bb]* )
-            tmux rename-session "$SERVER_IP $HOSTNAME_SHORT BUILD"
+            tmux rename-session "$SERVER_IP_$HOSTNAME_SHORT_BUILD"
             ;;
         * )
             echo "skipping..."
@@ -1695,6 +1738,21 @@ git_reset_hard()
         echo "Reset aborted."
     fi
 } #
+ww_git_update_config()
+{ #
+    if [ ! -d $HOME/.config/.ww/ ]; then 
+        echo "no Dir: $HOME/.config/.ww/"
+        return -1
+    fi
+    cd $HOME/.config/.ww/
+    if [[ -n $(git status --porcelain) ]]; then
+        echo "❌ Working directory not clean. Commit, stash or discard changes before pulling."
+        return -1
+    else
+        echo "✅ Working directory clean. Pulling latest changes..."
+        git pull
+    fi
+} #
 
 # === para#bash#.shared_bash#.history ===
 alias clr='clear -x'
@@ -1714,7 +1772,7 @@ if [ -z "$HOSTNAME_SHORT" ]; then
 fi
 SERVER_IP=$(hostname -I | awk '{print $1}' 2>/dev/null || echo "IP??")
     if [ -f /.dockerenv ]; then IS_DOCKER="DOCKER"; else IS_DOCKER=""; fi
-    if [ ! -n "$TMUX" ]; then IS_TMUX="tmux"; else IS_TMUX=""; fi
+    if [ -n "$TMUX" ]; then IS_TMUX="tmux"; else IS_TMUX=""; fi
 if [[ $HOSTNAME_SHORT == ildevdocker* ]]; then
     echo "hostname --short starts with 'ildevdocker'"
     PS1='\[\e[1;30;47m\] $SERVER_IP ● $(get_git_branch) ● #\#: $? ● \D{%H:%M:%S}'
