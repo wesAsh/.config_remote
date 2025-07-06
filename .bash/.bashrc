@@ -219,7 +219,6 @@ __tmux_create_or_attach_to_session_prev() {
             tmux source-file /root/.config/tmux/.tmux.conf
         elif [ -f C:/ws/cygwin64/home/wshabso/.tmux.conf ]; then
             tmux source-file C:/ws/cygwin64/home/wshabso/.tmux.conf
-        elif [ -f /home/wshabso/.config/tmux/.tmux.conf ]; then
         fi
     fi
     tmux attach -t "$SESSION_NAME"
@@ -253,13 +252,13 @@ __tmux_create_or_attach_to_session() {
             return -1
         fi
         echo "found .tmux.conf:  $TMUX_CONF_PATH"
-        sleep 4
+        read -n1 -p "Hit any key..." keys
         tmux -f "$TMUX_CONF_PATH" -u  new-session -s "$SESSION_NAME"
         return
     fi
     if [ "$(echo "$sessions" | wc -l)" -eq 1 ]; then
         echo "found 1 session: $sessions"
-        sleep 4
+        read -n1 -p "Hit any key..." keys
         tmux attach-session -t "$sessions"
         return
     fi
@@ -289,10 +288,12 @@ ww_tmux_session_prepare() {   # add: pods_start or BUILD
     echo ""
     case "$keys" in
         [Aa]* )
-            tmux rename-session "$SERVER_IP_$HOSTNAME_SHORT_pods_start"
+            tmux rename-session "pods_start__${SERVER_IP}_${HOSTNAME_SHORT}"
             ;;
         [Bb]* )
-            tmux rename-session "$SERVER_IP_$HOSTNAME_SHORT_BUILD"
+            tmux rename-session "BUILD__${SERVER_IP}_${HOSTNAME_SHORT}"
+            tmux rename-window Git
+            tmux new-window -n DOCKER_BUILD
             ;;
         * )
             echo "skipping..."
@@ -533,6 +534,66 @@ alias lltr='__ls_grep "ls -latr"'
 alias ld='__ls_grep "ls -la | grep '^d'"'
 alias ld='__ls_grep "ls -la | grep \"^d\""'
 alias la='__ls_grep "ls -la"'
+
+# === cygwin64#home#bashrc_s#git_stuff#git_aliases.sh ===
+#!/bin/bash
+function githelp() {
+    echo "git branch -a   # will show remote and local"
+    echo "git branch -vv  # will show remote and local"
+}
+function gitLogOptions() {
+	if [ $1 == "-h" ]; then
+		printf "    gsm  --> git status --untracked-files=no\n"
+		printf "    glo  --> git status --untracked-files=no\n"
+		printf "    glfh --> git log -p <filename>#  file diff history \n"
+		printf "    gfp  --> git fetch --prune \n"
+	elif [ $1 == "gsm" ]; then
+		git status --untracked-files=no
+		printf "  →→$GREEN git status --untracked-files=no $NC\n"
+		printf "$YELLOW  (------------ WA: without listing untracked files ------------)$NC\n"
+	fi
+}
+glo_oneline_formated_func() {
+    clear -x
+    if [ "$#" -eq 0 ]; then
+        printf "git log --format... ${GREEN}use '-a' to show all, '-4' for 4 etc ${NC}\n"
+        num_of_records="-10"
+    elif [ "$1" == "-a" ]; then
+        num_of_records=""
+    fi
+    git log --date=format:'%Y-%m-%d %H:%M'   \
+        --format='%C(yellow)%ad  %C(red) %<(23)%p %C(cyan)%h %C(blue)| %<(23)%an |%C(reset) %s'   \
+        $num_of_records   \
+        "$@"
+}
+function gsm() {
+    echo -e "\033[1;33m------------ git status --untracked-files=no ------------\033[0m"
+    echo -e "\033[1;33m------------ WA: without listing untracked files ------------\033[0m"
+    git status --untracked-files=no "$@"
+}
+ww_git_pull_if_no_change() {
+    if ! git diff --quiet && ! git diff --cached --quiet; then
+        echo "❌ Tracked files are modified or staged. Commit or stash them before pulling."
+        exit 1
+    fi
+    echo "✅ No changes to tracked files. Pulling latest changes..."
+    git pull
+    return
+    if [[ -n $(git status --porcelain) ]]; then
+        echo "❌ Working directory not clean. Commit, stash or discard changes before pulling."
+        return 1
+    fi
+    echo "✅ Working directory clean. Pulling latest changes..."
+    git pull
+}
+alias gba='git branch -a -vv'
+alias gb='git branch -vv | cat'
+alias gs='git status'
+alias gbw='git branch -vv | grep -i "wa" | bat -S'
+alias gbc='git branch -vv --color | grep --color "\*"'
+alias gdw="git diff -w --ignore-blank-lines"
+alias gitdiff='git diff $COMMIT~ $COMMIT'  # first is Previous and later current
+alias | egrep "git "
 
 # === para#bash#.shared_bash#.bashrc ===
 __append_block_to_file() {
