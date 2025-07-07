@@ -282,22 +282,36 @@ ww_tmux_session_prepare() {   # add: pods_start or BUILD
     if [ ! -n "$TMUX" ]; then echo "Not inside tmux"; return; fi
     local HOSTNAME_SHORT=$(hostname --short 2>/dev/null || echo "??")
     local SERVER_IP=$(hostname -I | awk '{print $1}' 2>/dev/null || echo "IP??")
+    local NAME=""
     echo "a) pods_start"
+    echo "c) pods_start classic"
     echo "b) BUILD"
     read -n1 -p "Choose Option: " keys
     echo ""
     case "$keys" in
         [Aa]* )
-            tmux rename-session "pods_start__${SERVER_IP}_${HOSTNAME_SHORT}"
+            NAME="pods_start"
+            tmux rename-window Git
+            ;;
+        [Cc]* )
+            NAME="pods_start"
+            tmux rename-window VIEW
+            tmux split-window -v
+            tmux select-pane -t +
+            tmux split-window -h
+            tmux new-window -n tcpdum
+            tmux next-window
             ;;
         [Bb]* )
-            tmux rename-session "BUILD__${SERVER_IP}_${HOSTNAME_SHORT}"
+            NAME="BUILD"
             tmux rename-window Git
             tmux new-window -n DOCKER_BUILD
             ;;
         * )
             echo "skipping..."
+            return
     esac
+    tmux rename-session "${NAME}__${SERVER_IP}_${HOSTNAME_SHORT}"
 }
 
 # === cygwin64#home#bashrc_s#cd_location#fzf01.sh ===
@@ -1734,6 +1748,7 @@ ___grep_tail()
 {
     file_path="$1"
     search_pattern="$2"
+    if [ ! -f "$file_path" ]; then echo "no file: $file_path"; return -1; fi
     matches=$(tail -n 1000 "$file_path" | grep -w "$search_pattern" | tail -n 6)
     count=$(echo "$matches" | wc -l)
     if [ "$count" -lt 6 ]; then
@@ -1750,6 +1765,12 @@ ww_ric_indication_show()
     ___grep_tail "/var/log/pw-share/pods/stack/dunode03/nrlogs/gnb_du_e2du.log" "RIC Indication sent to RIC"
     ___grep_tail "/var/log/pw-share/pods/stack/cunode01/nrlogs/gnb_cu_e2cu.log" "RIC Indication sent to RIC"
     ___grep_tail "/var/log/pw-share/pods/stack/cunode01/nrlogs/gnb_cu_e2cu.1.log" "RIC Indication sent to RIC"
+    latest_file=$(ls -t /var/log/pw-share/pods/stack/dunode03/nrlogs/e2du_main.* 2>/dev/null | head -n 1)
+    ___grep_tail $latest_file "RIC Indication sent to RIC"
+    latest_file=$(ls -t /var/log/pw-share/pods/stack/dunode02/nrlogs/e2du_main.* 2>/dev/null | head -n 1)
+    ___grep_tail $latest_file "RIC Indication sent to RIC"
+    latest_file=$(ls -t /var/log/pw-share/pods/stack/cunode01/nrlogs/e2cu_main.* 2>/dev/null | head -n 1)
+    ___grep_tail $latest_file "RIC Indication sent to RIC"
 }
 
 # === para#bash#.shared_bash#.git_funcs ===
@@ -1871,7 +1892,10 @@ toggle_ps1()
         PS1='\[\e[0;32m\]\w/ \[\e[0;31m\]($?) $IS_TMUX $IS_DOCKER \[\e[1;30;46m\] \h $STY $SERVER_IP \[\e[1;30;47m\] \D{%H:%M:%S}'
         PS1+='\[\e[0m\]\n#\#● →→→'
     elif (( 3 == ps1_counter )); then
-        PS1='\[\e[2;31m\]∟($?) \D{%H:%M:%S}\[\e[0;34m\] $IS_TMUX $IS_DOCKER\[\e[2;33m\] \h-$SERVER_IP'
+        PS1='\[\e[0;47;31m\]∟($?) \D{%H:%M:%S}\[\e[34m\] $IS_TMUX $IS_DOCKER\[\e[0;33m\] \h $SERVER_IP'
+        PS1+='\n#\#● \[\e[0;32m\]$PWD \[\e[0m\]→→→'
+    elif (( 4 == ps1_counter )); then
+        PS1='\[\e[2;31m\]∟($?) \D{%H:%M:%S}\[\e[0;34m\] $IS_TMUX $IS_DOCKER\[\e[2;33m\] \h $SERVER_IP'
         PS1+='\n#\#● \[\e[0;32m\]$PWD \[\e[0m\]→→→'
     else
         PS1='\n#\#● →→→'
