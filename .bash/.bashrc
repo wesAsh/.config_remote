@@ -118,6 +118,8 @@ ww_big_menu() {
     if [ "MobaX" == "$TERM_NAME" ]; then
         cmd_map["r"]="__remote_menu"
         exp_map["r"]="REMOTE ssh, set, etc"
+        cmd_map["w"]="my_ww_functions_search"
+        exp_map["w"]="all functions that start in ww_"
         cmd_map["j"]="MyCommandsBetter"
         exp_map["j"]="fzf on my files"
         cmd_map["g"]="_git_commands"
@@ -139,7 +141,9 @@ ww_big_menu() {
             exp_map["t"]="tmux create, attach, kill"
         fi
         cmd_map["j"]="my_functions_search"
-        exp_map["j"]="all functions that start in ww_"
+        exp_map["j"]="all functions"
+        cmd_map["w"]="my_ww_functions_search"
+        exp_map["w"]="all functions that start in ww_"
     fi
     clear -x
     echo "██████████████████████████████"
@@ -174,12 +178,12 @@ __render_selected() {
     local cmd="$1"
     local edit_command="$2"
     local command="$1"      # in case we don't edit command
-    if [ "add_to_history" == $edit_command ]; then
+    if [[ "add_to_history" == $edit_command ]]; then
         history -s "$cmd"
         printf "$BGreen Added to history:$NC $cmd\n"
         return
     fi
-    if [ "edit_command" == $edit_command ]; then
+    if [[ "edit_command" == $edit_command ]]; then
         read -er -i "$cmd" -p '▶ ' command
         if [ -d /root/.config/.bash/ ]; then
             tmp_script="/root/.config/.bash/_tmp_sh.sh"
@@ -204,6 +208,46 @@ try_this() {
     echo "original: $cmd"
     echo "edited:   $command"
     eval "$command"
+}
+
+# === cygwin64#home#bashrc_s#.config#fzf#fzf_my_funcs.sh ===
+IS_FUNCTIONS_LIST_INITIALIZED=0
+FUNCTIONS_WW_LIST=()
+FUNCTIONS_LIST=()
+___initialize_functions() {
+    IS_FUNCTIONS_LIST_INITIALIZED=1
+    FUNCTIONS_WW_LIST=$(declare -F | awk '$3 ~ /^ww_/ {print $3}')
+    FUNCTIONS_LIST=$(declare -F | awk '{print $3}')
+}
+__fzf_search_on_arg() {
+    local LINES="$1"
+    local explanation="$2"
+    if [ -z "$LINES" ]; then
+        echo "No $explanation were found."
+        return 1
+    fi
+    clear -x
+    local selected
+    selected=$(echo "$LINES" | fzf --height 60% --border --prompt="Select function: ")
+    __render_selected "$selected" "edit_command"
+}
+my_ww_functions_search() {  # search for ww_ funcs
+    if ___not_has_fzf; then return 1; fi
+    if [ 0 -eq $IS_FUNCTIONS_LIST_INITIALIZED ]; then ___initialize_functions; fi
+    __fzf_search_on_arg "$FUNCTIONS_WW_LIST" "ww_ functions"
+}
+my_functions_search() {  # search for ww_ funcs
+    if ___not_has_fzf; then return 1; fi
+    if [ 0 -eq $IS_FUNCTIONS_LIST_INITIALIZED ]; then ___initialize_functions; fi
+    __fzf_search_on_arg "$FUNCTIONS_LIST" "all functions"
+}
+___initialize_list_variables() {
+    declare -p  # To list all variables:
+    compgen -v # To list only names of variables (scalars + arrays):
+    declare -p | awk '{print $3}' | sed 's/=.*//'   # To extract just variable names using declare
+    declare -x   # For exported variables (like env vars)
+    declare -A   # For associative arrays
+    declare -a   # For indexed arrays
 }
 
 # === cygwin64#home#bashrc_s#.config#global_vars.sh ===

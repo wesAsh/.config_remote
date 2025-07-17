@@ -130,8 +130,11 @@ time ./docker-create.sh ubuntu && time ./docker-run.sh ubuntu ▪ ildevdocker
 ./.help/make_compile.sh user    ▪ ildevdocker compile user sctp
 ./.help/make_compile.sh kernel  ▪ ildevdocker compile kernel sctp
 vim .help/make_compile.sh       ▪ ildevdocker
-scp nr_stack.tar.gz root@10.166.56.104:/root/   ▪ ildevdocker copy to Laso
 git_clean_dfx_with_prompt                       ▪ ildevdocker
+make clean && git_clean_dfx_with_prompt         ▪ ildevdocker
+scp nr_stack.tar.gz root@10.166.56.104:/root/.config/nr/   ▪ ildevdocker copy to Laso
+scp nr_stack.tar.gz root@10.166.74.94:/root/.config/nr/    ▪ ildevdocker copy to Trophy
+scp nr_stack.tar.gz root@10.166.74.80:/root/.config/nr/    ▪ ildevdocker copy to REMOTE_vacuum
 grep "Data rate" /var/log/pw-share/pods/stack/dunode02/nrlogs/gnb_du_layer2.log
 grep "Data rate" /var/log/pw-share/pods/stack/dunode02/nrlogs/gnb_du_layer2.log | grep -E -v "MAC\(0...\/0...\) RLC\(0...\/0...\)"
 sudo dmidecode -s system-serial-number    # get vBBU serial not python..
