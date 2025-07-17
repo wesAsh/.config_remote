@@ -2064,37 +2064,6 @@ get_threads_cpu_policy_CU()
     get_threads_cpu_policy gnb_cu_e2cu
 } #
 
-# === para#bash#.shared_bash#ww_functions.sh ===
-IS_FUNCTIONS_LIST_INITIALIZED=0
-FUNCTIONS_LIST=()
-___initialize_functions() {
-    IS_FUNCTIONS_LIST_INITIALIZED=1
-    FUNCTIONS_LIST=$(declare -F | awk '$3 ~ /^ww_/ {print $3}')
-}
-my_functions_search() {  # search for ww_ funcs
-    if ! command -v fzf &> /dev/null; then echo "Error: fzf is not installed. Please install it first"; return 1; fi
-    if [ 0 -eq $IS_FUNCTIONS_LIST_INITIALIZED ]; then ___initialize_functions; fi
-    if [ -z "$FUNCTIONS_LIST" ]; then
-        echo "No functions starting with 'ww_' were found."
-        return 1
-    fi
-    clear -x
-    local selected
-    selected=$(echo "$FUNCTIONS_LIST" | fzf --height 60% --border --prompt="Select ww_ function: ")
-    if [ -n "$selected" ]; then
-        read -e -i "$selected" -p '▶ ' command
-        eval "$command"
-    fi
-}
-___initialize_list_variables() {
-    declare -p  # To list all variables:
-    compgen -v # To list only names of variables (scalars + arrays):
-    declare -p | awk '{print $3}' | sed 's/=.*//'   # To extract just variable names using declare
-    declare -x   # For exported variables (like env vars)
-    declare -A   # For associative arrays
-    declare -a   # For indexed arrays
-}
-
 # === para#bash#.shared_bash#_kubectl ===
 #!/bin/bash
 __restart_pod() {
