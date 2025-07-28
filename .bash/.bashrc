@@ -484,6 +484,7 @@ function MyCommandsBetter() {
     __render_selected "$CHOSEN_FZF" "$EDIT_COMMAND_RENDER"
 }
 function MyCD_Directory() {
+    local edit_command="$1"
     clear -x
     __Refresh_Files
     CHOSEN_FZF=$(
@@ -501,7 +502,7 @@ function MyCD_Directory() {
     fi
     CHOSEN_FZF=${CHOSEN_FZF/ C:\// \/$TERM_ROOT\/c\/}
     ____RemoveTrailing
-    __render_selected "$CHOSEN_FZF"  "$EDIT_COMMAND_RENDER"
+    __render_selected "$CHOSEN_FZF"  "$edit_command"
 }
 function MyHistory() {
     local CHOSEN_FZF=$(history | fzf $FZF_ARGS)
@@ -528,7 +529,8 @@ function MyOpenFiles()
 } #]
 bind '"\C-g":"MyCommandsBetter\n"'
 bind '"\C-r":"MyCD_Directory\n"'
-printf "$BGreen Use Ctr-r + Ctrl-g with fzf\n$NC"
+alias rr='MyCD_Directory "edit_command"'
+printf "$BGreen Use Ctr-r + Ctrl-g with fzf + rr\n$NC"
 
 # === cygwin64#home#bashrc_s#functions#ls_options.sh ===
 function __ls_only()

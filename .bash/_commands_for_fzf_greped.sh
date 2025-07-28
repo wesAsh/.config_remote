@@ -48,6 +48,9 @@ glo_oneline_formated --author='Wesley'	                       ▪
 	ssh-add /home/wshabso/.ssh/id_2023_12_06 ▪ for git in PW
  git --help ▪ #                      
 	          ▪ 
+  ▪
+ sort filename | uniq -c  ▪ count the number of times each unique line appears
+ uniq -c file             ▪ count the number of times each unique line appears (file should be sorted)
  EDIT_COMMAND_RENDER="add_to_history" ▪ then populate with up arrow key
  EDIT_COMMAND_RENDER="edit_command"   ▪ edit the command but not with completion etc
  EDIT_COMMAND_RENDER="execute_as_is"  ▪ 
