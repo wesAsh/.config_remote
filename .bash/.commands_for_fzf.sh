@@ -32,6 +32,9 @@ tail -f /var/log/pw-share/pods/stack/cunode01/nrlogs/e2cu_main
 vi /root/.config/.bash/.commands_for_fzf.sh
 vi /root/du/messages
 tail -f /root/du/messages
+mv /staging/crashes/core* /var/log/                     ▪ inside CU/DU pod @ gdb core crash @ bash@
+gdb /opt/pw/nrstack/exec/gNB_CU/bin/gnb_cu_l3 core      ▪ inside CU/DU pod @ gdb core crash @ bash@
+gdb /opt/pw/nrstack/exec/gNB_DU/bin/dumgr core          ▪ inside CU/DU pod @ gdb core crash @ bash@
 strace -p $(pidof gnb_app)
 gdb -p $(pidof gnb_app)
 gdb $BINARY_FILE --batch -ex "attach $(pidof gnb_cu_oam)" -ex "thread apply all backtrace"
@@ -119,9 +122,6 @@ rm /var/log/pw-share/pods/stack/cunode01/prvt/nr_stack.tar.gz /var/log/pw-share/
 __remove_prvt_files   # remove private remove prvt rm
 cksum univrunode /var/log/pw-share/pods/stack/dunode02/prvt/univrunode /var/log/pw-share/pods/stack/cunode01/prvt/univrunode
 your_command 2>&1 | tee -a output.log   # redirect both stdout and stderr to file while still printing to console
-mv /staging/crashes/core* /var/log/                     ▪ inside CU/DU pod @ gdb core crash @ bash@
-gdb /opt/pw/nrstack/exec/gNB_CU/bin/gnb_cu_l3 core      ▪ inside CU/DU pod @ gdb core crash @ bash@
-gdb /opt/pw/nrstack/exec/gNB_DU/bin/dumgr core          ▪ inside CU/DU pod @ gdb core crash @ bash@
 pod_str="bbu";pod_name=$(kubectl get pods -n pw | grep $pod_str | awk '{print $1}');kubectl exec -c bbu-container -it $pod_name -n pw -- /bin/bash  ▪ enter bbu pod
 pod_str="ptp";pod_name=$(kubectl get pods -n pw | grep $pod_str | awk '{print $1}');kubectl exec -it $pod_name -n pw -- /bin/bash   ▪ enter ptp pod
 cd /work/wshabso/kernelSCTP/nr-stack/                         ▪ ildevdocker kernel sctp

@@ -210,6 +210,25 @@ try_this() {
     eval "$command"
 }
 
+# === cygwin64#home#bashrc_s#.config#completion#complete_02.sh ===
+__generic_completion_multi_word() {
+    local cur=${COMP_WORDS[COMP_CWORD]}  # Current word being typed
+    local cmd=${COMP_WORDS[0]}           # Command name
+    local options_var="${cmd}_options"   # Options array name (e.g., my_command_options)
+    local options
+    eval "options=(\"\${${options_var}[@]}\")"
+    COMPREPLY=()
+    for opt in "${options[@]}"; do
+        if [[ $opt == $cur* ]]; then
+            COMPREPLY+=("$opt")
+        fi
+    done
+}
+register_completion() {
+    local cmd=$1
+    complete -F __generic_completion_multi_word "$cmd"
+}
+
 # === cygwin64#home#bashrc_s#.config#fzf#fzf_my_funcs.sh ===
 IS_FUNCTIONS_LIST_INITIALIZED=0
 FUNCTIONS_WW_LIST=()
@@ -1651,26 +1670,6 @@ ww_cp_nrstack() {
     ____cp_nrstack  $1  /var/log/pw-share/pods/stack/dunode03
     ____cp_nrstack  $1  /var/log/pw-share/pods/stack/dunode04
 }
-PREV_RSS_L3=0
-__RSS_memory_write() {
-    PIDS=$(pidof $1)
-    if [ ! -n "$PIDS" ]; then
-        return
-    fi
-    for PID in $PIDS; do
-        RSS=$(awk '/VmRSS/{print $2}' /proc/$PID/status) # Resident Set Size in KB
-        if [[ $RSS -ne $PREV_RSS_L3 ]]; then
-            echo "$1 | $PID | $(date '+%Y-%m-%d %H:%M:%S') | RSS: $RSS kB"
-            PREV_RSS_L3="$RSS"
-         fi
-    done
-}
-__RSS_memory_track() {
-    while true; do
-        __RSS_memory_write gnb_cu_l3
-        sleep 4
-    done
-}
 ww_wdg_mdg_more() {
     if [ -f /root/cu/nrlogs/gnb_cu_pdcp.log ]; then
         tail -n 100 /root/cu/nrlogs/gnb_cu_pdcp.log | grep "DL IN\|UL IN"
@@ -1680,6 +1679,19 @@ ___check_dir()
 {
     if [ ! -d $1 ]; then echo "no dir: $1"; return -1; fi
     return 0
+}
+___do_command_on_files_in_directory() {
+    local cmd="$1"
+    local dir="$2"
+    local file_pattern="$3"      # might be nr*
+    if [[ ! -d $dir ]]; then return; fi
+    for f in $dir/$file_pattern; do
+        if [[ -f $f ]]; then
+            if $cmd $f; then printf "SUCCESS:  $cmd $f\n"
+            else             printf "FAILED:   $cmd $f\n"
+            fi
+        fi
+    done
 }
 ww_nrstack()
 {
@@ -1701,12 +1713,12 @@ ww_nrstack()
         ;;
     [Rr]* )
         echo "removing nr_stack.tar.gz from cunode01/prvt/ dunode02/prvt/ dunode03/prvt/"
-        rm  /var/log/pw-share/pods/stack/cunode01/prvt/nr_stack.tar.gz
-        rm  /var/log/pw-share/pods/stack/dunode02/prvt/nr_stack.tar.gz
-        rm  /var/log/pw-share/pods/stack/dunode03/prvt/nr_stack.tar.gz
+        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/cunode01/prvt nr*
+        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/dunode02/prvt nr*
+        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/dunode03/prvt nr*
         ;;
     [Cc]* )
-        ww_cksum_nrstack
+        ww_cksum_nrstack_prvt
         ;;
     [MmKk]* )
         echo "mkdir prvt"
@@ -1892,6 +1904,43 @@ export HISTCONTROL=ignoredups:erasedups:ignorespace
 export HISTFILE="/root/.config/.ww/.bash/.bash_history"
 shopt -s histappend                      # append, don't overwrite history
 PROMPT_COMMAND='history -a; history -n'  # save/load history in prompt cycle
+
+# === para#bash#.shared_bash#.memstat ===
+#!/bin/bash
+PREV_RSS_L3=0
+__RSS_memory_write() {
+    PIDS=$(pidof $1)
+    if [ ! -n "$PIDS" ]; then
+        return
+    fi
+    for PID in $PIDS; do
+        RSS=$(awk '/VmRSS/{print $2}' /proc/$PID/status) # Resident Set Size in KB
+        RSS_MB=$(awk "BEGIN {printf \"%.2f\", $RSS/1024}") 
+        if [[ $RSS -ne $PREV_RSS_L3 ]]; then
+            echo "$1 | $PID | $(date '+%Y-%m-%d %H:%M:%S') | RSS: $RSS_MB MB | $RSS kB"
+            PREV_RSS_L3="$RSS"
+         fi
+    done
+}
+__RSS_memory_track() {
+    while true; do
+        __RSS_memory_write gnb_cu_l3
+        sleep 4
+    done
+}
+ww_memory_rss_track() {
+    local process_name="$1"
+    if [[ -z "$process_name" ]]; then
+        echo "You need to provide process name"
+        return -1
+    fi
+    while true; do
+        __RSS_memory_write "$process_name"
+        sleep 4
+    done
+}
+ww_memory_rss_track_options=("gnb_cu_oam" "gnb_cu_l3" "gnb_cu_e2cu" "gnb_cu_pdcp"  "gnb_cu_rrm" "gnb_cu_son")
+register_completion ww_memory_rss_track
 
 # === para#bash#.shared_bash#.PS1 ===
 HOSTNAME_SHORT=$(hostname --short 2>/dev/null)
