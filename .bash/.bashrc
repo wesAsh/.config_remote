@@ -704,6 +704,12 @@ HISTIGNORE=":  *:src,,:h:history:lfr*"
         mv lfrc_linux lfrc && chmod 666 lfrc && mkdir --parents .config/lf/ && mv lfrc .config/lf/
         echo "moved lfrc_linux to ~/.config/lf/"
     fi
+    cd ~
+    if [ -d .config/.ww/ ] && [ -f .config/.ww/lfrc_linux ]; then
+        mkdir --parents .config/lf/ && cp .config/.ww/lfrc_linux .config/lf/lfrc
+        echo "copied from:  ~/.config/.ww/lfrc_linux"
+        echo "to            ~/.config/lf/lfrc"
+    fi
     MY_FILE=~/lfrc_r33_linux_amd64
     if [ -f $MY_FILE ]; then
         if ! mv $MY_FILE /usr/bin/; then
@@ -1352,21 +1358,24 @@ function __stats_utime_stime()
         pmap -x $PID | egrep "total"
     done
 } #
+____print_thread_name_utime_stime() {
+    TID_DIR="$1"
+    THREAD_ID=$(basename "$TID_DIR")
+    if [ -f "$TID_DIR/stat" ]; then
+        UTIME_STIME=$(cat $TID_DIR/stat | awk '{print $14, $15}')
+        THREAD_NAME=$(cat $TID_DIR/stat | awk '{print $2}')
+        printf "%-20s | %8s | %10s | %10s\n" $THREAD_NAME $THREAD_ID $UTIME_STIME
+    fi
+}
 function __stats_utime_stime_include_threads()
 { #
    __get_PIDS_by_process_name $1
-    printf "  pid   utime   stime\n"
+    printf "%-20s | %8s | %10s | %10s\n" 'threadName' 'pid' 'utime' 'stime'
     for PID in $PIDS; do
-        printf " ------------------------ \n"
-        UTIME_STIME=$(cat /proc/$PID/stat | awk '{print $14, $15}')
-        printf "$PID $UTIME_STIME\n"
+        ____print_thread_name_utime_stime "/proc/$PID"
         for TID in /proc/$PID/task/*; do
-            THREAD_ID=$(basename "$TID")
-            if [ -f "$TID/stat" ]; then
-                UTIME_STIME=$(cat $TID/stat | awk '{print $14, $15}')
-                printf "$THREAD_ID $UTIME_STIME\n"
-                continue
-            fi
+            ____print_thread_name_utime_stime "$TID"
+            continue
             if [ -f "$TID/status" ]; then
                 echo "Thread ID: $THREAD_ID"
                 grep -E 'Name|State|Tgid|Pid|PPid|Uid|Gid' "$TID/status"
@@ -1520,20 +1529,6 @@ function ww_signal()
     printf "\n$CURTIME\n=======================" >> ~/cu/cleanExit.log
     printf "\n$CURTIME\n=======================" >> ~/du/cleanExit.log
 } #
-function __memory()  # 
-{ #
-    PID=$(pidof $1)
-    if [ ! -n "$PID" ]; then
-        echo "$1 -> No process found"
-        return
-    fi
-    cat /proc/$PID/maps | while read line; do
-    start=$(echo "$line" | awk '{print $1}' | cut -d'-' -f1)
-    end=$(echo "$line" | awk '{print $1}' | cut -d'-' -f2)
-    size=$((16#$end - 16#$start))
-    printf "%011d | %09x | %012s-%012s | XXX%s\n" "$size" "$size" "$start" "$end" "$line"
-    done | sort -nr | less
-} #
 __type_du__is_no_pie()  # should be from du pod ᛀ
 { #
     if ! is_inside_pod; then
@@ -1555,7 +1550,6 @@ __perf_strace()
     perf record -e malloc:malloc -e malloc:free -g -p $(pidof gnb_cu_l3)
     strace -f -e trace=mmap,munmap,brk -tt -T -p $(pidof gnb_cu_l3)
 } #
-alias ww_memory_gnb_du_layer2="__memory gnb_du_layer2"
 if [ "$#" -gt 0 ]; then
     if [ "$1" = "elapsed_time" ]; then
         ww_elapsed_time_
@@ -1907,8 +1901,22 @@ PROMPT_COMMAND='history -a; history -n'  # save/load history in prompt cycle
 
 # === para#bash#.shared_bash#.memstat ===
 #!/bin/bash
+function __memory_map()  #  alias ww_memory_gnb_du_layer2="__memory_map gnb_du_layer2"
+{ #
+    PID=$(pidof $1)
+    if [ ! -n "$PID" ]; then
+        echo "$1 -> No process found"
+        return
+    fi
+    cat /proc/$PID/maps | while read line; do
+        start=$(echo "$line" | awk '{print $1}' | cut -d'-' -f1)
+        end=$(echo "$line" | awk '{print $1}' | cut -d'-' -f2)
+        size=$((16#$end - 16#$start))
+        printf "%011d | %09x | %012s-%012s | XXX%s\n" "$size" "$size" "$start" "$end" "$line"
+    done | sort -nr | less
+} #
 PREV_RSS_L3=0
-__RSS_memory_write() {
+__memory_rss_track() {
     PIDS=$(pidof $1)
     if [ ! -n "$PIDS" ]; then
         return
@@ -1922,12 +1930,6 @@ __RSS_memory_write() {
          fi
     done
 }
-__RSS_memory_track() {
-    while true; do
-        __RSS_memory_write gnb_cu_l3
-        sleep 4
-    done
-}
 ww_memory_rss_track() {
     local process_name="$1"
     if [[ -z "$process_name" ]]; then
@@ -1935,7 +1937,7 @@ ww_memory_rss_track() {
         return -1
     fi
     while true; do
-        __RSS_memory_write "$process_name"
+        __memory_rss_track "$process_name"
         sleep 4
     done
 }

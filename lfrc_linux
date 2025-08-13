@@ -1,0 +1,39 @@
+
+set drawbox
+set hidden
+set number
+set wrapscroll
+# set icons
+set incsearch
+set ratios 1:3:6
+set info size:ctime
+
+# set timefmt "2023-12-16 15:04:05 "
+
+# there is already a lot of default mappings with s
+map st :set sortby time; set info time:size;
+
+map i up
+map k down
+map j updir
+map l open
+
+
+# remove this default mappings:
+map c
+map d
+map dd delete
+map cc cut
+
+map <enter> shell
+cmap <a-n> cmd-enter
+
+
+map gh   cd ~/
+map gC   cd ~/.config/
+map gpod cd /opt/pw-share/pods/
+map gcu  cd /var/log/pw-share/pods/stack/cunode01/
+map gdu  cd /var/log/pw-share/pods/stack/dunode02/
+map gcU  cd /opt/pw-share/pods/stack/cunode01/
+map gdU  cd /opt/pw-share/pods/stack/dunode02/
+
