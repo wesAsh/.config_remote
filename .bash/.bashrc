@@ -691,8 +691,8 @@ __append_block_to_file() {
 }
 ww_prepare_bash() {
 __append_block_to_file "$HOME/.vimrc" \
-'if (filereadable("/root/.config/.ww/.bash/.vimrc"))
-    source /root/.config/.ww/.bash/.vimrc
+'if (filereadable("/root/.config/.vimrc"))
+    source /root/.config/.vimrc
 endif'
 __append_block_to_file "$HOME/.bashrc" \
 '# ∙ww
@@ -710,6 +710,14 @@ HISTIGNORE=":  *:src,,:h:history:lfr*"
         echo "copied from:  ~/.config/.ww/lfrc_linux"
         echo "to            ~/.config/lf/lfrc"
     fi
+    if [ -d .config/.ww/ ] && [ -f .config/.ww/.vimrc ]; then
+        cp .config/.ww/.vimrc  .config/
+        echo "copied from:  ~/.config/.ww/.vimrc"
+        echo "to            ~/.config/.vimrc"
+    fi
+    printf "${BGreen}Downlowd lf and fzf:${NC}\n"
+    echo "    wget https://github.com/gokcehan/lf/releases/download/r36/lf-linux-amd64.tar.gz"
+	echo "    wget https://github.com/junegunn/fzf/releases/download/v0.65.1/fzf-0.65.1-linux_amd64.tar.gz"
     MY_FILE=~/lfrc_r33_linux_amd64
     if [ -f $MY_FILE ]; then
         if ! mv $MY_FILE /usr/bin/; then
@@ -1895,7 +1903,8 @@ alias version='head /etc/os-release'
 export TIME_STYLE=long-iso
 HISTIGNORE=":  *:src,,:psef *:h:hh:history:[ ]*ls[ ]*:ls:ll:clear -x:clear:clr:pwd:version:date:[ ]*vim *:[ ]*alias *:alias:lfr*"
 export HISTCONTROL=ignoredups:erasedups:ignorespace
-export HISTFILE="/root/.config/.ww/.bash/.bash_history"
+cd ~
+export HISTFILE="$PWD/.config/.ww/.bash/.bash_history"
 shopt -s histappend                      # append, don't overwrite history
 PROMPT_COMMAND='history -a; history -n'  # save/load history in prompt cycle
 
