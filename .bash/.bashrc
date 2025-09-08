@@ -986,6 +986,15 @@ __elapset_time_with_mem()
         printf "| %-15s | %10s | %7s | %2s/%2s | %8sMB | %8sMB |\n"   $PROCESS_NAME $ELAPSED_TIME $PID $NUM_OF_THREADS $EXPECTED_NUM_OF_THREADS $RSS_MB $VM_MB
     done
 } #
+____print_hugepages()
+{ #
+printf "${BGreen}hugepages ${NC}(Total, Free, Rsvd, Surp): "
+    awk '/HugePages_Total/ {t=$2}
+         /HugePages_Free/  {f=$2}
+         /HugePages_Rsvd/  {r=$2}
+         /HugePages_Surp/  {s=$2}
+         END {print t", "f", "r", "s}' /proc/meminfo
+} #
 ww_elapsed_time_()
 { #
     ORIGINAL_DIR=$(pwd)   # Save the current directory
@@ -1007,8 +1016,7 @@ ww_elapsed_time_()
     __elapset_time_with_mem "gnb_cu_rrm"   2
     __elapset_time_with_mem "gnb_cu_l3"    4
     __elapset_time_with_mem "gnb_cu_e2cu"  3
-    printf "$BGreen hugepages:\n$NC"
-    cat /proc/meminfo  | egrep HugePages_
+   ____print_hugepages
     printf "Checking files ${RED}larger than 20MB in nrlogs${NC}\n"
     cd /var/log/pw-share/pods/stack/cunode01/ && find ./nrlogs/ -type f -size +20M -printf "CU File: %p | Size: %s bytes\n"
     cd /var/log/pw-share/pods/stack/dunode02/ && find ./nrlogs/ -type f -size +20M -printf "DU File: %p | Size: %s bytes\n"
@@ -1784,7 +1792,7 @@ get_logs_e2cu_with_zip() {
     fi
     popd
 }
-___grep_tail()
+___grep_tail_prev()
 {
     matches=$(tail -n 1000 "$1" | grep -w "RIC Indication sent to RIC" | tail -n 3)
     if [ -n "$matches" ]; then
@@ -1792,7 +1800,7 @@ ___grep_tail()
         echo "$matches" | sed -E 's/  CPU:.*  VTID:[0-9]*//'
     fi
 }
-ww_ric_indication_show()
+ww_ric_indication_show_prev()
 {
     for f in /root/du02/nrlogs/*.log; do
         ___grep_tail "$f"
@@ -1821,16 +1829,17 @@ ___grep_tail()
 }
 ww_ric_indication_show()
 {
-    ___grep_tail "/var/log/pw-share/pods/stack/dunode02/nrlogs/gnb_du_e2du.log" "RIC Indication sent to RIC"
-    ___grep_tail "/var/log/pw-share/pods/stack/dunode03/nrlogs/gnb_du_e2du.log" "RIC Indication sent to RIC"
-    ___grep_tail "/var/log/pw-share/pods/stack/cunode01/nrlogs/gnb_cu_e2cu.log" "RIC Indication sent to RIC"
-    ___grep_tail "/var/log/pw-share/pods/stack/cunode01/nrlogs/gnb_cu_e2cu.1.log" "RIC Indication sent to RIC"
+    local pattern="RIC Indication sent to RIC\|RIC Indication sequence number"
+    ___grep_tail "/var/log/pw-share/pods/stack/dunode02/nrlogs/gnb_du_e2du.log"    "$pattern"
+    ___grep_tail "/var/log/pw-share/pods/stack/dunode03/nrlogs/gnb_du_e2du.log"    "$pattern"
+    ___grep_tail "/var/log/pw-share/pods/stack/cunode01/nrlogs/gnb_cu_e2cu.log"    "$pattern"
+    ___grep_tail "/var/log/pw-share/pods/stack/cunode01/nrlogs/gnb_cu_e2cu.1.log"  "$pattern"
     latest_file=$(ls -t /var/log/pw-share/pods/stack/dunode03/nrlogs/e2du_main.* 2>/dev/null | head -n 1)
-    ___grep_tail $latest_file "RIC Indication sent to RIC"
+    ___grep_tail $latest_file "$pattern"
     latest_file=$(ls -t /var/log/pw-share/pods/stack/dunode02/nrlogs/e2du_main.* 2>/dev/null | head -n 1)
-    ___grep_tail $latest_file "RIC Indication sent to RIC"
+    ___grep_tail $latest_file "$pattern"
     latest_file=$(ls -t /var/log/pw-share/pods/stack/cunode01/nrlogs/e2cu_main.* 2>/dev/null | head -n 1)
-    ___grep_tail $latest_file "RIC Indication sent to RIC"
+    ___grep_tail $latest_file "$pattern"
 }
 
 # === para#bash#.shared_bash#.git_funcs ===
