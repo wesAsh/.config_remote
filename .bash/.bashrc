@@ -998,7 +998,7 @@ printf "${BGreen}hugepages ${NC}(Total, Free, Rsvd, Surp): "
 ww_elapsed_time_()
 { #
     ORIGINAL_DIR=$(pwd)   # Save the current directory
-    printf "${BGreen}| ___ time + pid + threads + Memory RSS & VM ___\n$NC"
+    printf "${BGreen}| ____________________ time | pid | threads | Memory (RSS & VM)\n$NC"
     printf "${BGreen}| ___ OAMMGR'S ___\n$NC"
     __elapset_time_with_mem "oammgr"          3
     printf "${BGreen}| ___ PHY ___$NC without faultmgr\n"
@@ -1017,9 +1017,9 @@ ww_elapsed_time_()
     __elapset_time_with_mem "gnb_cu_l3"    4
     __elapset_time_with_mem "gnb_cu_e2cu"  3
    ____print_hugepages
-    printf "Checking files ${RED}larger than 20MB in nrlogs${NC}\n"
-    cd /var/log/pw-share/pods/stack/cunode01/ && find ./nrlogs/ -type f -size +20M -printf "CU File: %p | Size: %s bytes\n"
-    cd /var/log/pw-share/pods/stack/dunode02/ && find ./nrlogs/ -type f -size +20M -printf "DU File: %p | Size: %s bytes\n"
+printf "Files larger than ${RED}20MB in ${BGreen}CU/DU${NC}\n"
+    cd /var/log/pw-share/pods/stack/cunode01/ && find . -type f -size +20M -printf "%s %p\n" | awk '{printf "CU1: %6dMB | %s\n", ($1/1024/1024), $2}'
+    cd /var/log/pw-share/pods/stack/dunode02/ && find . -type f -size +20M -printf "%s %p\n" | awk '{printf "DU2: %6dMB | %s\n", ($1/1024/1024), $2}'
     cd "$ORIGINAL_DIR"    # Return to the original directory
 } #
 ww_elapsed_time_extend()
