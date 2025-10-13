@@ -1687,7 +1687,8 @@ ww_wdg_mdg_more() {
 }
 ___check_dir()
 {
-    if [ ! -d $1 ]; then echo "no dir: $1"; return -1; fi
+    if [ ! -d $1 ]; then printf "    ${RED}No Dir:${NC} $1\n"   ; return -1; fi
+    printf "    ${GREEN}Found:${NC} $1\n"
     return 0
 }
 ___do_command_on_files_in_directory() {
@@ -1697,8 +1698,8 @@ ___do_command_on_files_in_directory() {
     if [[ ! -d $dir ]]; then return; fi
     for f in $dir/$file_pattern; do
         if [[ -f $f ]]; then
-            if $cmd $f; then printf "SUCCESS:  $cmd $f\n"
-            else             printf "FAILED:   $cmd $f\n"
+            if $cmd $f; then printf "    SUCCESS:  $cmd $f\n"
+            else             printf "    FAILED:   $cmd $f\n"
             fi
         fi
     done
@@ -1723,9 +1724,9 @@ ww_nrstack()
         ;;
     [Rr]* )
         echo "removing nr_stack.tar.gz from cunode01/prvt/ dunode02/prvt/ dunode03/prvt/"
-        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/cunode01/prvt nr*
-        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/dunode02/prvt nr*
-        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/dunode03/prvt nr*
+        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/cunode01/prvt "nr*"
+        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/dunode02/prvt "nr*"
+        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/dunode03/prvt "nr*"
         ;;
     [Cc]* )
         ww_cksum_nrstack_prvt

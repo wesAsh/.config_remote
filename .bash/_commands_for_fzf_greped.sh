@@ -118,6 +118,8 @@ glo_oneline_formated --author='Wesley'	                       ▪
   time make -sj scf.dist                 ▪ -- # takes 3:00
   your_command 2>&1 | tee -a output.log  ▪ -- redirect both stdout and stderr to file while still printing to console
 	chown -R Administrators:None ./  ▪ 
+    du -sh .??* *    ▪ in current dir (also hidden files with at least 2 characters   
+    du -sh .*   *    ▪ in current dir (also hidden + total current (.) and total parent (..) 
     du -hs */        ▪ directories in current    
     du -hs /*/       ▪ directories in root maybe 
 	stat file.txt                    ▪ 
@@ -127,6 +129,7 @@ glo_oneline_formated --author='Wesley'	                       ▪
  time ctags -R . && dos2unix tags && wc -l tags          ▪ ctags working
  ctags.exe  -R --fields=+l --c-kinds=+lp --c++-kinds=+lp ./*                        ▪ ctags # generate tags for cpp file
  ctags -R --c++-kinds=+p --fields=+iaS --extra=+q --exclude=\./QAFramework/  ./     ▪ ctags
+ scp wshabso@ilks-dockerpool:/work/wshabso/devWA/diff_2025_09_docker ./  ▪ # 
 	grep -i "signal" iprs_pstack_*                                 ▪ 
  echo $PATH | sed 's/:/\n/g'    ▪ show PATH line by line
  $env:path -replace ';', "`n"   ▪ print $PATH in powershell line by line
