@@ -19,6 +19,8 @@ tcpdump -i any sctp    | grep -v HB
 tcpdump -i any sctp and host $RIC_IP   | grep DATA
 tcpdump -i any sctp and host $RIC_IP   | grep -v HB
 tcpdump -i any sctp -v | grep -E "length [1-2][0-9][0-9]"   # capture ric indication
+alias ww_tcpdump_ric='tcpdump -i any sctp and \(host 10.166.11.179 or host 10.166.9.169\)'
+tcpdump -i any sctp and \(host 10.166.11.179 or host 10.166.9.169\)                        # find RIC
 tcpdump -i any sctp and \(host 10.166.11.179 or host 10.166.10.88 or host 10.166.9.169\)   # find RIC
 tcpdump -i any 'sctp and (host 10.166.11.179 or host 10.166.10.88 or host 10.166.9.169)'   # find RIC
 RIC_IP="10.166.11.179"  # set RIC

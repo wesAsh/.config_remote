@@ -239,15 +239,15 @@ ___initialize_functions() {
     FUNCTIONS_LIST=$(declare -F | awk '{print $3}')
 }
 __fzf_search_on_arg() {
-    local LINES="$1"
+    local LINES_LIST="$1"
     local explanation="$2"
-    if [ -z "$LINES" ]; then
+    if [ -z "$LINES_LIST" ]; then
         echo "No $explanation were found."
         return 1
     fi
     clear -x
     local selected
-    selected=$(echo "$LINES" | fzf --height 60% --border --prompt="Select function: ")
+    selected=$(echo "$LINES_LIST" | fzf --height 60% --border --prompt="Select function: ")
     __render_selected "$selected" "edit_command"
 }
 my_ww_functions_search() {  # search for ww_ funcs
@@ -602,7 +602,7 @@ function __ls_grep()
 	echo ""
 } #↑
 alias lst='ls -allt --block-size=K --sort=size --reverse'
-alias lst='ls -allt --block-size K --sort=size -r'
+alias lst='ls -allt --block-size 1024 --sort=size -r'     # Moba
 alias lsa='__ls_only -alt'
 alias lsag='__lsa_grep'
 alias lsa='__ls_grep "ls -alt"'
