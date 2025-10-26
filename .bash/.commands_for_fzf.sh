@@ -26,6 +26,7 @@ tcpdump -i any 'sctp and (host 10.166.11.179 or host 10.166.10.88 or host 10.166
 RIC_IP="10.166.11.179"  # set RIC
 RIC_IP="10.166.9.169"   # set RIC
 RIC_IP="10.166.10.88"   # set RIC
+watch -n 1 'conntrack -L -p sctp'   # connection ESTABLISHED or CLOSED etc
 lfrc_r33_linux_amd64 /proc/$(pidof gnb_du_e2du)
 ps -o ppid= -p $(pidof dumgr)   # find PPID (the parent is oammgr)
 vi       /root/du/nrlogs/gnb_du_layer2.log

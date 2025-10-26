@@ -820,6 +820,7 @@ if is_inside_pod; then
         move_files "fzf"             "/usr/bin/"
     fi
 fi
+export VIMINIT='source $HOME/.config/.ww/.vimrc'
 export IS_MY_VI_ENV=1  # for my vi
 __source_file() {
     if [ -f $1 ]; then
