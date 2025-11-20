@@ -19,11 +19,14 @@ tcpdump -i any sctp    | grep -v HB
 tcpdump -i any sctp and host $RIC_IP   | grep DATA
 tcpdump -i any sctp and host $RIC_IP   | grep -v HB
 tcpdump -i any sctp -v | grep -E "length [1-2][0-9][0-9]"   # capture ric indication
+alias ww_tcpdump_ric='tcpdump -i any sctp and \(host 10.166.11.179 or host 10.166.9.169\)'
+tcpdump -i any sctp and \(host 10.166.11.179 or host 10.166.9.169\)                        # find RIC
 tcpdump -i any sctp and \(host 10.166.11.179 or host 10.166.10.88 or host 10.166.9.169\)   # find RIC
 tcpdump -i any 'sctp and (host 10.166.11.179 or host 10.166.10.88 or host 10.166.9.169)'   # find RIC
 RIC_IP="10.166.11.179"  # set RIC
 RIC_IP="10.166.9.169"   # set RIC
 RIC_IP="10.166.10.88"   # set RIC
+watch -n 1 'conntrack -L -p sctp'   # connection ESTABLISHED or CLOSED etc
 lfrc_r33_linux_amd64 /proc/$(pidof gnb_du_e2du)
 ps -o ppid= -p $(pidof dumgr)   # find PPID (the parent is oammgr)
 vi       /root/du/nrlogs/gnb_du_layer2.log
@@ -121,6 +124,7 @@ cksum /root/nr_stack.tar.gz /root/cu/prvt/nr_stack.tar.gz /root/du02/prvt/nr_sta
 rm /var/log/pw-share/pods/stack/cunode01/prvt/nr_stack.tar.gz /var/log/pw-share/pods/stack/dunode02/prvt/nr_stack.tar.gz  # remove private remove prvt
 __remove_prvt_files   # remove private remove prvt rm
 cksum univrunode /var/log/pw-share/pods/stack/dunode02/prvt/univrunode /var/log/pw-share/pods/stack/cunode01/prvt/univrunode
+your_command > output.txt 2>&1          # Save stdout + stderr to file WITHOUT printing to console
 your_command 2>&1 | tee -a output.log   # redirect both stdout and stderr to file while still printing to console
 pod_str="bbu";pod_name=$(kubectl get pods -n pw | grep $pod_str | awk '{print $1}');kubectl exec -c bbu-container -it $pod_name -n pw -- /bin/bash  ▪ enter bbu pod
 pod_str="ptp";pod_name=$(kubectl get pods -n pw | grep $pod_str | awk '{print $1}');kubectl exec -it $pod_name -n pw -- /bin/bash   ▪ enter ptp pod

@@ -33,3 +33,13 @@ if (1 == $IS_MY_VI_ENV)
 endif
 
 
+" Pathogen and plugins:
+" Install to ~/.vim/autoload/pathogen.vim. Or copy and paste the following into your terminal/shell:
+"     mkdir -p ~/.vim/autoload ~/.vim/bundle && curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
+"
+" Runtime Path Manipulation
+" Add this to your vimrc:
+" execute pathogen#infect()"
+"
+" you can clone plugins to 
+

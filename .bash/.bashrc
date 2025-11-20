@@ -239,15 +239,15 @@ ___initialize_functions() {
     FUNCTIONS_LIST=$(declare -F | awk '{print $3}')
 }
 __fzf_search_on_arg() {
-    local LINES="$1"
+    local LINES_LIST="$1"
     local explanation="$2"
-    if [ -z "$LINES" ]; then
+    if [ -z "$LINES_LIST" ]; then
         echo "No $explanation were found."
         return 1
     fi
     clear -x
     local selected
-    selected=$(echo "$LINES" | fzf --height 60% --border --prompt="Select function: ")
+    selected=$(echo "$LINES_LIST" | fzf --height 60% --border --prompt="Select function: ")
     __render_selected "$selected" "edit_command"
 }
 my_ww_functions_search() {  # search for ww_ funcs
@@ -547,9 +547,10 @@ function MyOpenFiles()
     fi
 } #]
 bind '"\C-g":"MyCommandsBetter\n"'
+bind '"jl":"MyCommandsBetter\n"'
 bind '"\C-r":"MyCD_Directory\n"'
 alias rr='MyCD_Directory "edit_command"'
-printf "$BGreen Use Ctr-r + Ctrl-g with fzf + rr\n$NC"
+printf "$BGreen Use Ctr-r + Ctrl-g / jl with fzf + rr\n$NC"
 
 # === cygwin64#home#bashrc_s#functions#ls_options.sh ===
 function __ls_only()
@@ -602,7 +603,7 @@ function __ls_grep()
 	echo ""
 } #↑
 alias lst='ls -allt --block-size=K --sort=size --reverse'
-alias lst='ls -allt --block-size K --sort=size -r'
+alias lst='ls -allt --block-size 1024 --sort=size -r'     # Moba
 alias lsa='__ls_only -alt'
 alias lsag='__lsa_grep'
 alias lsa='__ls_grep "ls -alt"'
@@ -665,11 +666,18 @@ ww_git_pull_if_no_change() {
     echo "✅ Working directory clean. Pulling latest changes..."
     git pull
 }
+__git_status_filtered() {
+    clear -x
+    printf "$PURPLE function __git_status_filtered() $NC\n"
+    printf "$BGreen     git status | grep -v "_UG#_Store" $NC\n\n"
+    git status | grep -v "_UG#_Store"
+}
 alias gba='git branch -a -vv'
 alias gb='git branch -vv | cat'
 alias gs='git status'
 alias gbw='git branch -vv | grep -i "wa" | bat -S'
 alias gbc='git branch -vv --color | grep --color "\*"'
+alias gsf='__git_status_filtered'
 alias gdw="git diff -w --ignore-blank-lines"
 alias gitdiff='git diff $COMMIT~ $COMMIT'  # first is Previous and later current
 alias | egrep "git "
@@ -820,6 +828,7 @@ if is_inside_pod; then
         move_files "fzf"             "/usr/bin/"
     fi
 fi
+export VIMINIT='source $HOME/.config/.ww/.vimrc'
 export IS_MY_VI_ENV=1  # for my vi
 __source_file() {
     if [ -f $1 ]; then
@@ -1687,7 +1696,8 @@ ww_wdg_mdg_more() {
 }
 ___check_dir()
 {
-    if [ ! -d $1 ]; then echo "no dir: $1"; return -1; fi
+    if [ ! -d $1 ]; then printf "    ${RED}No Dir:${NC} $1\n"   ; return -1; fi
+    printf "    ${GREEN}Found:${NC} $1\n"
     return 0
 }
 ___do_command_on_files_in_directory() {
@@ -1697,8 +1707,8 @@ ___do_command_on_files_in_directory() {
     if [[ ! -d $dir ]]; then return; fi
     for f in $dir/$file_pattern; do
         if [[ -f $f ]]; then
-            if $cmd $f; then printf "SUCCESS:  $cmd $f\n"
-            else             printf "FAILED:   $cmd $f\n"
+            if $cmd $f; then printf "    SUCCESS:  $cmd $f\n"
+            else             printf "    FAILED:   $cmd $f\n"
             fi
         fi
     done
@@ -1723,9 +1733,9 @@ ww_nrstack()
         ;;
     [Rr]* )
         echo "removing nr_stack.tar.gz from cunode01/prvt/ dunode02/prvt/ dunode03/prvt/"
-        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/cunode01/prvt nr*
-        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/dunode02/prvt nr*
-        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/dunode03/prvt nr*
+        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/cunode01/prvt "nr*"
+        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/dunode02/prvt "nr*"
+        ___do_command_on_files_in_directory rm /var/log/pw-share/pods/stack/dunode03/prvt "nr*"
         ;;
     [Cc]* )
         ww_cksum_nrstack_prvt
