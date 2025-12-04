@@ -1,6 +1,7 @@
 watch      kubectl get pods -n pw    # bcs 'watch kg' with alias won't work...
 watch -n 4 kubectl get pods -n pw
 uptime && who && w
+ww_elapsed_time_watch_try 10 show_large_files show_ric_indication
 ww_elapsed_time_watch  4
 ww_watch_elapsed_time_2        # watch every 2 seconds
 ww_watch_elapsed_time_4        # watch every 4 seconds
@@ -14,6 +15,8 @@ for f in /root/cu/nrlogs/*.log;   do tail -n 100 "$f" | grep -w "RIC Indication 
 for f in /root/du02/nrlogs/*.log; do tail -n 100 "$f" | grep -w "RIC Indication sent to RIC";  done
 grep -w "RIC Indication sent to RIC" /root/cu/nrlogs/*.log
 tcpdump -i any sctp
+tcpdump -i any "sctp and $ALL_RIC_IPS"
+tcpdump -i any "sctp and $ALL_RIC_IPS" | grep -v HB
 tcpdump -i any sctp    | grep DATA
 tcpdump -i any sctp    | grep -v HB
 tcpdump -i any sctp and host $RIC_IP   | grep DATA
@@ -23,9 +26,12 @@ alias ww_tcpdump_ric='tcpdump -i any sctp and \(host 10.166.11.179 or host 10.16
 tcpdump -i any sctp and \(host 10.166.11.179 or host 10.166.9.169\)                        # find RIC
 tcpdump -i any sctp and \(host 10.166.11.179 or host 10.166.10.88 or host 10.166.9.169\)   # find RIC
 tcpdump -i any 'sctp and (host 10.166.11.179 or host 10.166.10.88 or host 10.166.9.169)'   # find RIC
-RIC_IP="10.166.11.179"  # set RIC
-RIC_IP="10.166.9.169"   # set RIC
-RIC_IP="10.166.10.88"   # set RIC
+ALL_RIC_IPS="(host 10.166.11.81 or host 10.166.11.179 or host 10.166.10.88 or host 10.166.9.169)"
+tcpdump -i any "sctp and $ALL_RIC_IPS"
+RIC_IP="10.166.9.169"   # ric-109
+RIC_IP="10.166.11.179"  # ric-103
+RIC_IP="10.166.11.81"   # Evyatar's
+RIC_IP="10.166.10.88"   # RickyGal
 watch -n 1 'conntrack -L -p sctp'   # connection ESTABLISHED or CLOSED etc
 lfrc_r33_linux_amd64 /proc/$(pidof gnb_du_e2du)
 ps -o ppid= -p $(pidof dumgr)   # find PPID (the parent is oammgr)

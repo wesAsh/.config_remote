@@ -194,6 +194,11 @@ source "$tmp_script"
             return
         fi
     fi
+    if [[ "READLINE_RENDER" == $edit_command ]]; then
+        READLINE_LINE="$cmd"
+        READLINE_POINT=${#READLINE_LINE}
+        return
+    fi
     eval "$command"
 }
 __fzf_final() {
@@ -429,6 +434,7 @@ else
     ____create_second_file_if_not_exist_and_touch_first "$COMMANDS_FILE_REMOTE____ORG" "$COMMANDS_FILE_REMOTE_GREPED"
     ____create_second_file_if_not_exist_and_touch_first "$FUNCS_FILE____ORG"           "$FUNCS_FILE_GREPED"
 fi
+EDIT_COMMAND_RENDER="READLINE_RENDER"
 EDIT_COMMAND_RENDER="edit_command"
 EDIT_COMMAND_RENDER="add_to_history"
 FZF_ARGS=""
@@ -436,7 +442,7 @@ FZF_ARGS+=" --layout=reverse"
 FZF_ARGS+=" --cycle"
 FZF_ARGS+=" --tiebreak=index"
 FZF_ARGS+=" --no-mouse"          # Claude: --no-mouse prevents some terminal issues
-FZF_ARGS+=" --height=100%"
+FZF_ARGS+=" --height=90%"
 ___is_file1_newer_than_file2() {
     if [[ ! -f "$1" || ! -f "$2" ]]; then return -1; fi
     if [ "$1" -nt "$2" ]; then return 0; fi
@@ -488,6 +494,11 @@ __get_combined_content() {
     fi
 }
 function MyCommandsBetter() {
+    local edit_command="$EDIT_COMMAND_RENDER"
+    if [[ "--edit_commad" == "$1" ]]; then
+        edit_command="$2"
+        shift 2
+    fi
     __Refresh_Files 
     local current_input="${READLINE_LINE}"
     local MYGREP=""
@@ -500,7 +511,7 @@ function MyCommandsBetter() {
         CHOSEN_FZF=$(__get_combined_content                | fzf $FZF_ARGS)
     fi
     ____RemoveTrailing
-    __render_selected "$CHOSEN_FZF" "$EDIT_COMMAND_RENDER"
+    __render_selected "$CHOSEN_FZF" "$edit_command"
 }
 function MyCD_Directory() {
     local edit_command="$1"
@@ -547,9 +558,9 @@ function MyOpenFiles()
     fi
 } #]
 bind '"\C-g":"MyCommandsBetter\n"'
-bind '"jl":"MyCommandsBetter\n"'
 bind '"\C-r":"MyCD_Directory\n"'
 alias rr='MyCD_Directory "edit_command"'
+bind -x '"jl": MyCommandsBetter --edit_commad READLINE_RENDER'
 printf "$BGreen Use Ctr-r + Ctrl-g / jl with fzf + rr\n$NC"
 
 # === cygwin64#home#bashrc_s#functions#ls_options.sh ===
@@ -1007,6 +1018,14 @@ printf "${BGreen}hugepages ${NC}(Total, Free, Rsvd, Surp): "
 ww_elapsed_time_()
 { #
     ORIGINAL_DIR=$(pwd)   # Save the current directory
+    local is_print_largefile=
+    local is_print_ricIndication=
+    if [[ "show_large_files" == $1 ]]; then
+        is_print_largefile="yes"
+    fi
+    if [[ "show_ric_indication" == $2 ]]; then
+        is_print_ricIndication="yes"
+    fi
     printf "${BGreen}| ____________________ time | pid | threads | Memory (RSS & VM)\n$NC"
     printf "${BGreen}| ___ OAMMGR'S ___\n$NC"
     __elapset_time_with_mem "oammgr"          3
@@ -1026,9 +1045,14 @@ ww_elapsed_time_()
     __elapset_time_with_mem "gnb_cu_l3"    4
     __elapset_time_with_mem "gnb_cu_e2cu"  3
    ____print_hugepages
-printf "Files larger than ${RED}20MB in ${BGreen}CU/DU${NC}\n"
-    cd /var/log/pw-share/pods/stack/cunode01/ && find . -type f -size +20M -printf "%s %p\n" | awk '{printf "CU1: %6dMB | %s\n", ($1/1024/1024), $2}'
-    cd /var/log/pw-share/pods/stack/dunode02/ && find . -type f -size +20M -printf "%s %p\n" | awk '{printf "DU2: %6dMB | %s\n", ($1/1024/1024), $2}'
+if [[ -n $is_print_largefile ]]; then
+        printf "Files larger than ${RED}20MB in ${BGreen}CU/DU${NC}\n"
+        cd /var/log/pw-share/pods/stack/cunode01/ && find . -type f -size +20M -printf "%s %p\n" | awk '{printf "CU1: %6dMB | %s\n", ($1/1024/1024), $2}'
+        cd /var/log/pw-share/pods/stack/dunode02/ && find . -type f -size +20M -printf "%s %p\n" | awk '{printf "DU2: %6dMB | %s\n", ($1/1024/1024), $2}'
+    fi
+    if [[ -n $is_print_ricIndication ]]; then
+        ww_ric_indication_show 2
+    fi
     cd "$ORIGINAL_DIR"    # Return to the original directory
 } #
 ww_elapsed_time_extend()
@@ -1064,13 +1088,15 @@ ww_elapsed_time_watch_try()
     fi
     clear -x
     local sleepTime=$1
+    local is_print_largefile=$2
+    local is_print_ricIndication=$3
     local repeat=300
     if [[ -z $sleepTime ]]; then
         sleepTime=10
     fi
     while true ; do
         local timestamp=$(date +"%Y-%m-%d %H:%M:%S")
-        local output=$(ww_elapsed_time_)
+        local output=$(ww_elapsed_time_ $is_print_largefile $is_print_ricIndication)
         tput clear # to clear the screen
         printf "$timestamp   sleep for $sleepTime ($repeat)\n"
         echo "$output"
@@ -1826,30 +1852,53 @@ ___grep_tail()
 {
     file_path="$1"
     search_pattern="$2"
+    local num_of_records="$3"
+    if ! [[ $num_of_records =~ ^[0-9]+$ ]]; then
+        num_of_records=6
+    fi
     if [ ! -f "$file_path" ]; then echo "no file: $file_path"; return -1; fi
-    matches=$(tail -n 1000 "$file_path" | grep -w "$search_pattern" | tail -n 6)
+    matches=$(tail -n 1000 "$file_path" | grep -w "$search_pattern" | tail -n $num_of_records)
     count=$(echo "$matches" | wc -l)
-    if [ "$count" -lt 6 ]; then
-        matches=$(grep -w "$search_pattern" "$file_path" | tail -n 6)
+    if [ "$count" -lt $num_of_records ]; then
+        matches=$(grep -w "$search_pattern" "$file_path" | tail -n $num_of_records)
     fi
     if [ -n "$matches" ]; then
         printf "\nFile: $file_path\n"
         echo "$matches" | sed -E 's/  CPU:.*  VTID:[0-9]*//'
     fi
 }
-ww_ric_indication_show()
+ww_ric_indication_show_prev()
 {
     local pattern="RIC Indication sent to RIC\|RIC Indication sequence number"
     ___grep_tail "/var/log/pw-share/pods/stack/dunode02/nrlogs/gnb_du_e2du.log"    "$pattern"
     ___grep_tail "/var/log/pw-share/pods/stack/dunode03/nrlogs/gnb_du_e2du.log"    "$pattern"
     ___grep_tail "/var/log/pw-share/pods/stack/cunode01/nrlogs/gnb_cu_e2cu.log"    "$pattern"
     ___grep_tail "/var/log/pw-share/pods/stack/cunode01/nrlogs/gnb_cu_e2cu.1.log"  "$pattern"
+    ww_ric_indication_show
+}
+ww_ric_indication_show()
+{
+    local pattern="RIC Indication sent to RIC\|RIC Indication sequence number"
+    local num_of_records="$1"
+    if ! [[ $num_of_records =~ ^[0-9]+$ ]]; then
+        num_of_records=6
+    fi
     latest_file=$(ls -t /var/log/pw-share/pods/stack/dunode03/nrlogs/e2du_main.* 2>/dev/null | head -n 1)
-    ___grep_tail $latest_file "$pattern"
+    if [[ -n $latest_file ]]; then
+        ___grep_tail $latest_file "$pattern" "$num_of_records"
+    fi
     latest_file=$(ls -t /var/log/pw-share/pods/stack/dunode02/nrlogs/e2du_main.* 2>/dev/null | head -n 1)
-    ___grep_tail $latest_file "$pattern"
+    if [[ -n $latest_file ]]; then
+        ___grep_tail $latest_file "$pattern" "$num_of_records"
+    fi
     latest_file=$(ls -t /var/log/pw-share/pods/stack/cunode01/nrlogs/e2cu_main.* 2>/dev/null | head -n 1)
-    ___grep_tail $latest_file "$pattern"
+    if [[ -n $latest_file ]]; then
+        ___grep_tail $latest_file "$pattern" "$num_of_records"
+    fi
+    latest_file=$(ls -t /var/log/pw-share/pods/stack/cunode01/nrlogs/gnb_cu_e2cu.log* 2>/dev/null | head -n 1)
+    if [[ -n $latest_file ]]; then
+        ___grep_tail $latest_file "$pattern" "$num_of_records"
+    fi
 }
 
 # === para#bash#.shared_bash#.git_funcs ===
@@ -1921,9 +1970,15 @@ alias h='history 10'
 alias version='head /etc/os-release'
 export TIME_STYLE=long-iso
 HISTIGNORE=":  *:src,,:psef *:h:hh:history:[ ]*ls[ ]*:ls:ll:clear -x:clear:clr:pwd:version:date:[ ]*vim *:[ ]*alias *:alias:lfr*"
+export HISTIGNORE="$HISTIGNORE:[a-zA-Z0-9][a-zA-Z0-9]:" # ignore 2-char commands
 export HISTCONTROL=ignoredups:erasedups:ignorespace
+pushd .
 cd ~
 export HISTFILE="$PWD/.config/.ww/.bash/.bash_history"
+echo "export HISTFILE=$PWD/.config/.ww/.bash/.bash_history"
+popd
+unset PROMPT_COMMAND  # Disable immediate history writes: Then Bash only writes when the session exits → no interference.
+shopt -s histappend  # So history appends instead of overwriting when multiple shells exit.
 shopt -s histappend                      # append, don't overwrite history
 PROMPT_COMMAND='history -a; history -n'  # save/load history in prompt cycle
 
