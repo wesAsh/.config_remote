@@ -1,3 +1,7 @@
+let s:path = expand('<sfile>:p') " Absolute path of script file
+
+echom printf("sourcing %s", s:path)
+
 if (0)
     " put this in /root/.vimrc at remote
     if (filereadable("/root/.config/.bash/.vimrc"))
@@ -8,7 +12,12 @@ if (0)
 endif
 
 if (1 == $IS_MY_VI_ENV)
-    source $VIMRUNTIME/mswin.vim
+    if (has('nvim'))
+       " source /root/.config/nvim/init.lua
+       source $HOME/.config/nvim/init.lua
+    else
+        source $VIMRUNTIME/mswin.vim
+    endif
     set paste
     set nowrapscan
     

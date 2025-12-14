@@ -154,7 +154,7 @@ ww_big_menu() {
     __choose_option cmd_map exp_map "dont_edit_command"
 }
 printf "$BGreen Use 🔗🔗 jj 🔗🔗\n$NC"
-bind '"jj":"ww_big_menu\n"'
+bind '"jj":"__guardFunc ww_big_menu\n"'
 
 # === cygwin64#home#bashrc_s#.config#common_01.sh ===
 #!/bin/bash
@@ -382,6 +382,45 @@ ww_tmux_session_prepare() {   # add: pods_start or BUILD
     tmux rename-session "${NAME}__${SERVER_IP}_${HOSTNAME_SHORT}"
 }
 
+# === cygwin64#home#bashrc_s#.config#utils#guards.sh ===
+__BashFunc1Impl() {
+    echo "Function 1: $@"
+    sleep 4
+}
+__BashFunc2Impl() {
+    echo "Function 2: $@"
+    sleep 2
+}
+__BashFunc3Impl() {
+    echo "Function 3: $@"
+    sleep 3
+}
+__guardFunc() {
+    local func_name="$1"
+    shift  # Remove function name from args
+    local last_exit_file="/tmp/guard_${func_name}_last_exit"
+    local min_interval=500  # Minimum milliseconds between executions
+    local current_time=$(date +%s%3N)  # can be something like: 1765343749253
+    local last_exit=0
+    if [[ -f "$last_exit_file" ]]; then
+        last_exit=$(cat "$last_exit_file")
+    fi
+    local time_diff=$((current_time - last_exit))
+    if [[ $time_diff -lt $min_interval ]]; then
+        echo "[$func_name] Too soon after last execution (${time_diff}ms), skipping"
+        return
+    fi
+    trap "date +%s%3N > '$last_exit_file'" RETURN
+    "$func_name" "$@"
+}
+export -f __BashFunc1Impl
+export -f __BashFunc2Impl
+export -f __BashFunc3Impl
+export -f __guardFunc
+bind -x '"ii1": __guardFunc __BashFunc1Impl arg1 arg2'
+bind -x '"ii2": __guardFunc __BashFunc2Impl arg1 arg2'
+bind -x '"ii3": __guardFunc __BashFunc3Impl arg1 arg2'
+
 # === cygwin64#home#bashrc_s#cd_location#fzf01.sh ===
 RED='\033[0;31m'
 NC='\033[0m'
@@ -560,7 +599,7 @@ function MyOpenFiles()
 bind '"\C-g":"MyCommandsBetter\n"'
 bind '"\C-r":"MyCD_Directory\n"'
 alias rr='MyCD_Directory "edit_command"'
-bind -x '"jl": MyCommandsBetter --edit_commad READLINE_RENDER'
+bind -x '"jl": __guardFunc MyCommandsBetter --edit_commad READLINE_RENDER'
 printf "$BGreen Use Ctr-r + Ctrl-g / jl with fzf + rr\n$NC"
 
 # === cygwin64#home#bashrc_s#functions#ls_options.sh ===

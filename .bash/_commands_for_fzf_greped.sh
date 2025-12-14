@@ -1,18 +1,19 @@
  __update_ugrep_indexes  ▪ safe ugrep
  source /$TERM_ROOT/c/ws/cygwin64/home/bashrc_s/git_stuff/git_prompt_03.sh
- git stash  ▪ TODO!
  git fetch && git reset --hard @{u}   ▪ reset to following branch
  git reset --hard @{u}                ▪ reset to following branch
  git reset --hard origin/$BRANCH      ▪ reset to 
+ git fetch --prune && git rebase origin/develop  ▪
+ git merge origin/develop                        ▪
+ git fetch --prune                               ▪
+ ww_git_delete_current_local_branch              ▪ git branch delete
+ git stash  ▪ TODO!
  git reset file  ▪ revert git add (if modified will stay modified)
  git_touch_last_commit_and_modified  ▪ safe with prompt
  git ls-tree COMMIT PATH  ▪ get <mode> <type> <object-sha> <file-name>
  git hash-object PATH     ▪ get <mode> <type> <object-sha> <file-name>
  git cherry-pick abc123^..def456     ▪ from parent of abc123 up to def456 changes
  git difftool --tool=vimdiff  ▪ side by side in terminal
- git fetch --prune          ▪ ddd
- git rebase origin/develop  ▪ 
- git merge origin/develop   ▪ 
  git checkout -b $BRANCH origin/$BRANCH      ▪ 
  git status && git branch                    ▪ 
  git status | grep -v ._UG#_Store            ▪ 
@@ -83,6 +84,7 @@ glo_oneline_formated --author='Wesley'	                       ▪
  find_files_changed_last_X_minutes -60  ▪ files modified last 60min (hour)
  find_files_changed_last_X_day     -0.8 ▪ files modified last 0.8 day (0.8 * 24 * 60 minutes)
   ▪
+ find . -type f -exec du -hk {} \; | sort -nr ▪ files by size, reverse the sort
  find . -type f -mtime -0.8 -exec bash -c 'timeSinceLastUpdate "$0"' {} \;  ▪
  find2 -type f -mtime -1.5  ▪   in days (24 hours)  
  find2 -type f -mtime -1.5  ▪   in days (24 hours)  
@@ -91,7 +93,6 @@ glo_oneline_formated --author='Wesley'	                       ▪
  find . -type f -mmin -60 ! -path "*\.git\/*"    ▪ in minutes  find 
  find . -type f -mtime -0.1 ! -path "*\.git\/*"  ▪ in days (24 hours)    find 
  find . -type f -not -path "*\.git\/*"           ▪ find no git 
- find . -type f -exec du -hk {} \; | sort -nr ▪ reverse the sort
  find . \( -name "*.c" -o -name "*.h" -o -name "*.cpp" -o -name "*.hpp" \) -type f >> __ALL_FILES      ▪
   ▪
   find . -type f -empty           ▪# check for empty files (no delete) 
@@ -128,6 +129,7 @@ glo_oneline_formated --author='Wesley'	                       ▪
 	perl -e 'for(<applog_0*>){((stat)[9]<(unlink))}'               ▪  # one of best ways to remove huge amount of files (even when rm don't work)
 	rsync --relative  Alpha/Lib/yourFile.cpp dir1/dir1son/         ▪  # like cp --parents   - works on solaris sparc
  time ctags --options=.ctags -R . && dos2unix tags && wc -l tags          ▪ ctags working
+ wc -l tags && time ctags --exclude=*.json -R . && dos2unix tags && wc -l tags          ▪ ctags working
  time ctags -R . && dos2unix tags && wc -l tags          ▪ ctags working
  ctags -R -f tags asn_enc_dec/ orane2/ security/          ▪ ctags working
  ctags.exe  -R --fields=+l --c-kinds=+lp --c++-kinds=+lp ./*                        ▪ ctags  # generate tags for cpp file
