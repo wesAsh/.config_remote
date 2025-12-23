@@ -379,7 +379,7 @@ ww_tmux_session_prepare() {   # add: pods_start or BUILD
             echo "skipping..."
             return
     esac
-    tmux rename-session "${NAME}__${SERVER_IP}_${HOSTNAME_SHORT}"
+    tmux rename-session "${NAME}  ${HOSTNAME_SHORT}  ${SERVER_IP}"
 }
 
 # === cygwin64#home#bashrc_s#.config#utils#guards.sh ===
@@ -482,6 +482,22 @@ FZF_ARGS+=" --cycle"
 FZF_ARGS+=" --tiebreak=index"
 FZF_ARGS+=" --no-mouse"          # Claude: --no-mouse prevents some terminal issues
 FZF_ARGS+=" --height=90%"
+export FZF_DEFAULT_OPTS='
+  --ansi
+  --color=hl:underline,hl+:reverse
+  --pointer=">"
+  --marker="●"
+'
+if hash bat; then
+    FZF_WITH_BAT="--preview 'bat --color=always --style=numbers {}'"
+    FZF_WITH_BAT=(
+      --preview
+      "bat --color=always --style=numbers {}"
+    )
+else
+    FZF_WITH_BAT=()
+fi
+FZF_WITH_BAT=()
 ___is_file1_newer_than_file2() {
     if [[ ! -f "$1" || ! -f "$2" ]]; then return -1; fi
     if [ "$1" -nt "$2" ]; then return 0; fi
@@ -545,9 +561,9 @@ function MyCommandsBetter() {
     	MYGREP='| grep -E \"$@\"'
     fi
     if [ "$#" -gt 0 ]; then
-        CHOSEN_FZF=$(__get_combined_content | grep -E "$@" | fzf $FZF_ARGS)
+        CHOSEN_FZF=$(__get_combined_content | grep -E "$@" | fzf $FZF_ARGS "${FZF_WITH_BAT[@]}")
     else
-        CHOSEN_FZF=$(__get_combined_content                | fzf $FZF_ARGS)
+        CHOSEN_FZF=$(__get_combined_content                | fzf $FZF_ARGS "${FZF_WITH_BAT[@]}")
     fi
     ____RemoveTrailing
     __render_selected "$CHOSEN_FZF" "$edit_command"
@@ -564,7 +580,7 @@ function MyCD_Directory() {
                     cat $_file
                 fi
             done
-        } | fzf $FZF_ARGS
+        } | fzf $FZF_ARGS "${FZF_WITH_BAT[@]}"
     )
     if ! [[ $? -eq 0 && -n "$CHOSEN_FZF" ]]; then
         return
@@ -574,7 +590,7 @@ function MyCD_Directory() {
     __render_selected "$CHOSEN_FZF"  "$edit_command"
 }
 function MyHistory() {
-    local CHOSEN_FZF=$(history | fzf $FZF_ARGS)
+    local CHOSEN_FZF=$(history | fzf $FZF_ARGS "${FZF_WITH_BAT[@]}")
     READLINE_LINE=${CHOSEN_FZF#*$'\t'}
 }
 ____RemoveTrailing() {
@@ -632,7 +648,7 @@ function __lsa_grep()
 } #↑
 function __ls_grep()
 { #↓
-	if ($# == 0); then
+	if (($# == 0)); then
 		echo "function needs arguments"
 		return
 	fi
@@ -763,6 +779,11 @@ HISTIGNORE=":  *:src,,:h:history:lfr*"
         echo "moved lfrc_linux to ~/.config/lf/"
     fi
     cd ~
+    if [ -d .config/.ww/ ] && [ -f .config/.ww/.tmux.conf ]; then
+        mkdir --parents .config/tmux/ && cp .config/.ww/.tmux.conf .config/tmux/
+        echo "copied from:  ~/.config/.ww/.tmux.conf"
+        echo "to            ~/.config/tmux/"
+    fi
     if [ -d .config/.ww/ ] && [ -f .config/.ww/lfrc_linux ]; then
         mkdir --parents .config/lf/ && cp .config/.ww/lfrc_linux .config/lf/lfrc
         echo "copied from:  ~/.config/.ww/lfrc_linux"

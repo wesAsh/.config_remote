@@ -117,6 +117,7 @@ glo_oneline_formated --author='Wesley'	                       ▪
   cd /var/log/prvt             ▪  -- in DU/CU pod
   cd /root && ./nr_setupTool_k8s.sh -c && ./nr_setupTool_k8s.sh && ./nr_setupTool_k8s.sh pods  ▪  -- copy and restart
   tail -f cu/cleanExit.log   ▪  --
+  make run ARGS='' ▪ ARGS='first_arg  second_arg'
   ./docker-create.sh && ./docker-run.sh  ▪  --
   time make -sj scf.dist                 ▪  -- # takes 3:00
   your_command 2>&1 | tee -a output.log  ▪  -- redirect both stdout and stderr to file while still printing to console
