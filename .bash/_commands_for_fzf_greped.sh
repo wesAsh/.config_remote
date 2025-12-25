@@ -136,7 +136,8 @@ glo_oneline_formated --author='Wesley'	                       ▪
  ctags.exe  -R --fields=+l --c-kinds=+lp --c++-kinds=+lp ./*                        ▪ ctags  # generate tags for cpp file
  ctags -R --c++-kinds=+p --fields=+iaS --extra=+q --exclude=\./QAFramework/  ./     ▪ ctags
  dos2unix tags && wc -l tags  ▪ after ctags
- scp wshabso@ilks-dockerpool:/work/wshabso/BBBBB/unitTest/e2cu_ut_frwk/logs/* ./  ▪ # 
+ scp wshabso@ilks-dockerpool:/work/wshabso/devWA/unitTest/e2cu_ut_frwk/logs/*     ./  ▪ # 
+ scp wshabso@ilks-dockerpool:/work/wshabso/devWA/unitTest/e2cu_ut_frwk/build_out* ./  ▪ # 
  scp wshabso@ilks-dockerpool:/work/wshabso/devWA/diff_2025_09_docker ./  ▪ # 
 	grep -i "signal" iprs_pstack_*                                 ▪ 
  echo $PATH | sed 's/:/\n/g'    ▪ show PATH line by line
