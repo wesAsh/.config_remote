@@ -779,20 +779,18 @@ HISTIGNORE=":  *:src,,:h:history:lfr*"
         echo "moved lfrc_linux to ~/.config/lf/"
     fi
     cd ~
+    printf "${BGreen}cp configs:${NC}\n"
     if [ -d .config/.ww/ ] && [ -f .config/.ww/.tmux.conf ]; then
         mkdir --parents .config/tmux/ && cp .config/.ww/.tmux.conf .config/tmux/
-        echo "copied from:  ~/.config/.ww/.tmux.conf"
-        echo "to            ~/.config/tmux/"
+        echo "    cp ~/.config/.ww/.tmux.conf  ~/.config/tmux/"
     fi
     if [ -d .config/.ww/ ] && [ -f .config/.ww/lfrc_linux ]; then
         mkdir --parents .config/lf/ && cp .config/.ww/lfrc_linux .config/lf/lfrc
-        echo "copied from:  ~/.config/.ww/lfrc_linux"
-        echo "to            ~/.config/lf/lfrc"
+        echo "    cp ~/.config/.ww/lfrc_linux  ~/.config/lf/lfrc"
     fi
     if [ -d .config/.ww/ ] && [ -f .config/.ww/.vimrc ]; then
         cp .config/.ww/.vimrc  .config/
-        echo "copied from:  ~/.config/.ww/.vimrc"
-        echo "to            ~/.config/.vimrc"
+        echo "    cp ~/.config/.ww/.vimrc      ~/.config/.vimrc"
     fi
     printf "${BGreen}Downlowd lf and fzf:${NC}\n"
     echo "    wget https://github.com/gokcehan/lf/releases/download/r36/lf-linux-amd64.tar.gz"
@@ -1938,7 +1936,7 @@ ww_ric_indication_show_prev()
 }
 ww_ric_indication_show()
 {
-    local pattern="RIC Indication sent to RIC\|RIC Indication sequence number"
+    local pattern="RIC Indication sent to RIC"
     local num_of_records="$1"
     if ! [[ $num_of_records =~ ^[0-9]+$ ]]; then
         num_of_records=6
@@ -2029,18 +2027,31 @@ alias clr='clear -x'
 alias h='history 10'
 alias version='head /etc/os-release'
 export TIME_STYLE=long-iso
-HISTIGNORE=":  *:src,,:psef *:h:hh:history:[ ]*ls[ ]*:ls:ll:clear -x:clear:clr:pwd:version:date:[ ]*vim *:[ ]*alias *:alias:lfr*"
+HISTIGNORE=":  *:src,,:psef *:h:hh:history:[ ]*ls[ ]*:ls:ll:clear -x:clear:clr:pwd:version:date:[ ]*vim *:[ ]*alias *:alias:"
+export HISTIGNORE
 export HISTIGNORE="$HISTIGNORE:[a-zA-Z0-9][a-zA-Z0-9]:" # ignore 2-char commands
 export HISTCONTROL=ignoredups:erasedups:ignorespace
-pushd .
-cd ~
-export HISTFILE="$PWD/.config/.ww/.bash/.bash_history"
-echo "export HISTFILE=$PWD/.config/.ww/.bash/.bash_history"
-popd
 unset PROMPT_COMMAND  # Disable immediate history writes: Then Bash only writes when the session exits → no interference.
 shopt -s histappend  # So history appends instead of overwriting when multiple shells exit.
-shopt -s histappend                      # append, don't overwrite history
 PROMPT_COMMAND='history -a; history -n'  # save/load history in prompt cycle
+WW_HIST_DIR="$HOME/.config/.ww/.bash"
+WW_HIST_MAIN="$WW_HIST_DIR/.bash_history"
+WW_HIST_SESSION="$WW_HIST_DIR/.bash_history.$$.$(date +%s)"
+mkdir -p "$WW_HIST_DIR"
+touch "$WW_HIST_MAIN"
+export HISTFILE="$WW_HIST_MAIN"
+history -r
+export HISTFILE="$WW_HIST_SESSION"
+ww_history_merge() {
+    history -a
+    cat "$WW_HIST_SESSION" >> "$WW_HIST_MAIN"
+    rm -f "$WW_HIST_SESSION"
+}
+trap ww_history_merge EXIT
+pushd .
+cd ~
+echo "export HISTFILE=$WW_HIST_SESSION"
+popd
 
 # === para#bash#.shared_bash#.memstat ===
 #!/bin/bash
@@ -2094,7 +2105,7 @@ if [ -z "$HOSTNAME_SHORT" ]; then
 fi
 SERVER_IP=$(hostname -I | awk '{print $1}' 2>/dev/null || echo "IP??")
     if [ -f /.dockerenv ]; then IS_DOCKER="DOCKER"; else IS_DOCKER=""; fi
-    if [ -n "$TMUX" ]; then IS_TMUX="tmux"; else IS_TMUX=""; fi
+    if [ -n "$TMUX" ]; then IS_TMUX=" tmux"; else IS_TMUX=""; fi
 if [[ $HOSTNAME_SHORT == ildevdocker* ]]; then
     echo "hostname --short starts with 'ildevdocker'"
     PS1='\[\e[1;30;47m\] $SERVER_IP ● $(get_git_branch) ● #\#: $? ● \D{%H:%M:%S}'
@@ -2122,19 +2133,23 @@ else
     PS1+='\[\e[0m\] \w/\n● →→'
 fi
 ps1_counter=2
-toggle_ps1()
+ps1_toggle()
 {
+    PS1=''
     let "ps1_counter++"
     if (( 1 == ps1_counter )); then
-        PS1='\[\e[1;30;47m\]● \D{%Y-%m-%d  %H:%M:%S} ● #\#: [$?] ●\[\e[0m\]        \[\e[1;30;46m\]● \h $STY $SERVER_IP \[\e[0m\]'
+        PS1+='\[\e[1;30;47m\]● \D{%Y-%m-%d  %H:%M:%S} ● #\#: [$?] ●\[\e[0m\]        \[\e[1;30;46m\]● \h $STY $SERVER_IP \[\e[0m\]'
         PS1+='\n● \w/ →→→'
     elif (( 2 == ps1_counter )); then
         PS1='\[\e[0;32m\]\w/ \[\e[0;31m\]($?) $IS_TMUX $IS_DOCKER \[\e[1;30;46m\] \h $STY $SERVER_IP \[\e[1;30;47m\] \D{%H:%M:%S}'
         PS1+='\[\e[0m\]\n#\#● →→→'
     elif (( 3 == ps1_counter )); then
+        PS1='\[\e[0;33m\]\h $SERVER_IP \[\e[0;32m\]$PWD \[\e[0m\]\n'
+        PS1+='\[\e[0;47;34m\]$IS_TMUX $IS_DOCKER →→→\[\e[0m\] '
+    elif (( 4 == ps1_counter )); then
         PS1='\[\e[0;47;31m\]∟($?) \D{%H:%M:%S}\[\e[34m\] $IS_TMUX $IS_DOCKER\[\e[0;33m\] \h $SERVER_IP'
         PS1+='\n#\#● \[\e[0;32m\]$PWD \[\e[0m\]→→→'
-    elif (( 4 == ps1_counter )); then
+    elif (( 5 == ps1_counter )); then
         PS1='\[\e[2;31m\]∟($?) \D{%H:%M:%S}\[\e[0;34m\] $IS_TMUX $IS_DOCKER\[\e[2;33m\] \h $SERVER_IP'
         PS1+='\n#\#● \[\e[0;32m\]$PWD \[\e[0m\]→→→'
     else
@@ -2143,7 +2158,16 @@ toggle_ps1()
     fi
     printf "\n    Current ps1_counter = $ps1_counter\n\n"
 }
-toggle_ps1 && echo "toggle_ps1 to change PS1"
+ps1_toggle_all_examples_not_working_of_course() {
+    local start=$ps1_counter
+    ps1_toggle
+    sleep 0.3
+    while (( ps1_counter != start )); do
+        ps1_toggle
+        sleep 0.3
+    done
+}
+ps1_toggle && echo "ps1_toggle to change PS1"
 
 # === para#bash#.shared_bash#.vars ===
 #!/bin/bash

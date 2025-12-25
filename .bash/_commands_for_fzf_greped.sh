@@ -44,7 +44,7 @@ glo_oneline_formated --author='Wesley'	                       ▪
 	git diff $COMMIT~ $COMMIT    ▪ 
 	git diff -w --ignore-blank-lines      ▪ 
  { git diff --no-color --numstat; git diff --no-color; } >> /$TERM_ROOT/c/ws/para/Git/
- { glo_oneline_formated --no-color -10; git diff --no-color --numstat; git diff --no-color; } >> /$TERM_ROOT/c/ws/para/Git/
+ { glo_oneline_formated_func --no-color -10; git diff --no-color --numstat; git diff --no-color; } >> /$TERM_ROOT/c/ws/para/Git/
 	git checkout -b Gen5_Phase3.2_Integration_Tmp          ▪ 
  git rev-parse --short FullHashCommit     ▪ print short version of commit hash 
 	eval $(ssh-agent -s)                     ▪ for my git push...
@@ -136,8 +136,11 @@ glo_oneline_formated --author='Wesley'	                       ▪
  ctags.exe  -R --fields=+l --c-kinds=+lp --c++-kinds=+lp ./*                        ▪ ctags  # generate tags for cpp file
  ctags -R --c++-kinds=+p --fields=+iaS --extra=+q --exclude=\./QAFramework/  ./     ▪ ctags
  dos2unix tags && wc -l tags  ▪ after ctags
- scp wshabso@ilks-dockerpool:/work/wshabso/BBBBB/unitTest/e2cu_ut_frwk/logs/* ./  ▪ # 
+ scp wshabso@ilks-dockerpool:/work/wshabso/devWA/unitTest/e2cu_ut_frwk/logs/*     ./  ▪ # 
+ scp wshabso@ilks-dockerpool:/work/wshabso/devWA/unitTest/e2cu_ut_frwk/build_out* ./  ▪ # 
  scp wshabso@ilks-dockerpool:/work/wshabso/devWA/diff_2025_09_docker ./  ▪ # 
+ scp $REMOTE_VACUUM:/root/.config/nr/logs/* .        ▪ # scp logs
+ scp $REMOTE_TROPHY:/root/.config/nr/logs/* .        ▪ # scp logs
 	grep -i "signal" iprs_pstack_*                                 ▪ 
  echo $PATH | sed 's/:/\n/g'    ▪ show PATH line by line
  $env:path -replace ';', "`n"   ▪ print $PATH in powershell line by line

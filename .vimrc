@@ -1,6 +1,8 @@
 let s:path = expand('<sfile>:p') " Absolute path of script file
 
-echom printf("sourcing %s", s:path)
+if has('nvim')
+    echom printf("sourcing %s", s:path)
+endif
 
 if (0)
     " put this in /root/.vimrc at remote

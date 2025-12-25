@@ -28,6 +28,7 @@ tcpdump -i any sctp and \(host 10.166.11.179 or host 10.166.10.88 or host 10.166
 tcpdump -i any 'sctp and (host 10.166.11.179 or host 10.166.10.88 or host 10.166.9.169)'   # find RIC
 ALL_RIC_IPS="(host 10.166.11.81 or host 10.166.11.179 or host 10.166.10.88 or host 10.166.9.169)"
 tcpdump -i any "sctp and $ALL_RIC_IPS"
+RIC_IP="10.166.8.148"   # pickle-ric
 RIC_IP="10.166.9.169"   # ric-109
 RIC_IP="10.166.11.179"  # ric-103
 RIC_IP="10.166.11.81"   # Evyatar's
