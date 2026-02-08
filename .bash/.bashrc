@@ -681,6 +681,70 @@ alias ld='__ls_grep "ls -la | grep '^d'"'
 alias ld='__ls_grep "ls -la | grep \"^d\""'
 alias la='__ls_grep "ls -la"'
 
+# === cygwin64#home#bashrc_s#git_funcs#git_funcs_2025_12.sh ===
+ww_git_delete_current_local_branch() { # added with claude in 2025_12_11
+    clear -x
+    local current_branch=$(git branch --show-current)
+    if [ -z "$current_branch" ]; then
+        echo "Error: Not currently on a branch (already detached?)"
+        return 1
+    fi
+    echo "Current branch: $current_branch"
+    echo "Fetching and pruning remote refs..."
+    git fetch --prune || echo "Warning: fetch failed, continuing anyway..."
+    local remote_tracking=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+    if [ -n "$remote_tracking" ] && [ "$remote_tracking" != "@{u}" ]; then
+        echo "Warning: Remote tracking branch '$remote_tracking' still exists"
+        read -p "Continue anyway? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Aborted."
+            return 1
+        fi
+    else
+        echo "✓ No remote tracking branch (safe to delete)"
+    fi
+    if ! git diff-index --quiet HEAD --; then
+        echo "Warning: You have uncommitted changes"
+        read -p "Checkout and lose changes? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Aborted."
+            return 1
+        fi
+    fi
+    echo "Detaching HEAD..."
+    git checkout --detach || return 1
+    echo "Attempting to delete branch '$current_branch'..."
+    if git branch -d "$current_branch" 2>/dev/null; then
+        echo "✓ Branch '$current_branch' deleted successfully"
+    else
+        echo "Branch has unmerged commits."
+        read -p "Force delete? (y/N): " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            git branch -D "$current_branch"
+            echo "✓ Branch '$current_branch' force deleted"
+        else
+            echo "Aborted. Staying in detached HEAD state."
+            return 1
+        fi
+    fi
+}
+ww_git_show_pr_commits() {
+    clear -x
+    local merge_sha=$1
+    git show $1
+    echo "Merge commit:"
+    git show --format="%ad   %p   %h | %s" --date=format:'%Y_%m_%d %H:%M' -s "$merge_sha"
+    echo -e "\nPR commits:"
+    git log --format="%ad   %p   %h | %s" --date=format:'%Y_%m_%d %H:%M' "${merge_sha}^1..${merge_sha}^2"
+}
+if false; then
+    git log --merges --oneline --ancestry-path <commit-sha>..develop
+    git log --merges --oneline --ancestry-path e2cf8b68c1..develop
+fi
+
 # === cygwin64#home#bashrc_s#git_stuff#git_aliases.sh ===
 #!/bin/bash
 function githelp() {
@@ -707,7 +771,7 @@ glo_oneline_formated_func() {
     elif [ "$1" == "-a" ]; then
         num_of_records=""
     fi
-    git log --date=format:'%Y-%m-%d %H:%M'   \
+    git log --date=format:'%Y_%m_%d %H:%M'   \
         --format='%C(yellow)%ad  %C(red) %<(23)%p %C(cyan)%h %C(blue)| %<(23)%an |%C(reset) %s'   \
         $num_of_records   \
         "$@"
