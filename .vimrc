@@ -1,7 +1,8 @@
 let s:path = expand('<sfile>:p') " Absolute path of script file
 
 if has('nvim')
-    echom printf("sourcing %s", s:path)
+    echom printf("sourcing %s finish", s:path)
+    finish
 endif
 
 if (0)
@@ -30,12 +31,10 @@ if (1 == $IS_MY_VI_ENV)
     inoremap lj <Esc>
     cnoremap lj <Esc>
     
-    nnoremap ; i
-    
-    nnoremap ; i
-    nnoremap i k
-    nnoremap k j
-    nnoremap j h
+    " nnoremap ; i
+    " nnoremap i k
+    " nnoremap k j
+    " nnoremap j h
     
     " scroll screen upd and down, <C-e> is already default
     nnoremap <C-r> <C-Y>

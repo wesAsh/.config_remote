@@ -109,12 +109,12 @@ vi /var/log/prvt/Thread_config_DU.xml   # in DU pod, config, xml, ini
 vi /var/log/prvt/Thread_config.xsd      # in DU pod, config, xml, ini
 cd /opt/pw/nrstack/exec/configuration/
 vi /opt/pw/nrstack/exec/configuration/debugConfig.txt   # in DU/CU pod, for oammgr config
-tar -czvf zipOrg.tar.gz messages gnb_du_layer2.log 
+tar -czvf zipOrg.tar.gz messages gnb_du_layer2.log
 tar -xzvf zipOrg.tar.gz   # to untar
 tmux attach-session -t pods_start
 tmux new-session -s pods_start
 cp /root/nr_stack.tar.gz_kernel_sctpE2   du/prvt/nr_stack.tar.gz
-cp /root/nr_stack.tar.gz_kernel_sctpE2   cu/prvt/nr_stack.tar.gz       
+cp /root/nr_stack.tar.gz_kernel_sctpE2   cu/prvt/nr_stack.tar.gz
 cp /root/nr_stack.tar.gz_kernel_sctp_10_10_1500  /root/du/prvt/nr_stack.tar.gz
 cp /root/nr_stack.tar.gz_kernel_sctp_10_10_1500  /root/cu/prvt/nr_stack.tar.gz
 cd ~ && nn

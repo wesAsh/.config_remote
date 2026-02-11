@@ -13,10 +13,10 @@ set info size:ctime
 # there is already a lot of default mappings with s
 map st :set sortby time; set info time:size;
 
-map i up
-map k down
-map j updir
-map l open
+# map i up
+# map k down
+# map j updir
+# map l open
 
 
 # remove this default mappings:
