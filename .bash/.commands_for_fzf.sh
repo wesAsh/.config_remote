@@ -42,6 +42,8 @@ tail -f /var/log/pw-share/pods/stack/cunode01/nrlogs/e2cu_main
 vi /root/.config/.bash/.commands_for_fzf.sh
 vi /root/du/messages
 tail -f /root/du/messages
+cd /opt/pw/didir/di-files/ && ls -all 
+mkdir -p /opt/pw/didir/di-files/ && touch /opt/pw/didir/di-files/uploadstop   ▪ not inside CU/DU pod? @ gdb core crash @ bash@ keep core files in zip at that dir
 mv /staging/crashes/core* /var/log/                     ▪ inside CU/DU pod @ gdb core crash @ bash@
 gdb /opt/pw/nrstack/exec/gNB_CU/bin/gnb_cu_l3 core      ▪ inside CU/DU pod @ gdb core crash @ bash@
 gdb /opt/pw/nrstack/exec/gNB_DU/bin/dumgr core          ▪ inside CU/DU pod @ gdb core crash @ bash@

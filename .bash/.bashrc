@@ -277,6 +277,14 @@ ___initialize_list_variables() {
 # === cygwin64#home#bashrc_s#.config#global_vars.sh ===
 __g_output_for_fzf=""
 
+# === cygwin64#home#bashrc_s#.config#syntax_and_maps#lf_and_vim_mode.sh ===
+set -o vi
+export EDITOR=vim
+bind 'set show-mode-in-prompt on'
+bind 'set vi-ins-mode-string \1\e[6 q\2'  # Vertical bar for insert mode
+bind 'set vi-cmd-mode-string \1\e[2 q\2'  # Block cursor for normal mode
+export LS_COLORS=$(echo "$LS_COLORS" | sed 's/tw=[^:]*://; s/ow=[^:]*://')
+
 # === cygwin64#home#bashrc_s#.config#tmux_screen#tmux_01.sh ===
 TMUX_CONF_PATH=""
 __tmux_create_or_attach_to_session_prev() {
@@ -2391,4 +2399,5 @@ __restart_pod() {
 ww_get_manifest_list_from_smo_nr_dev() {
     curl -s --location https://10.194.63.10:443/api/v1/artifact/manifest/all  -H "Authorization: Basic cGFyYWxsZWw6R29yZTJJS2o3cVJFT25ueVlzRXU4d1c5" -k | jq -r '.[].ID' | sort -r
 }
-
+# TODO check first if linux x86_64
+export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
