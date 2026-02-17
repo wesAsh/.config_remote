@@ -174,8 +174,8 @@ alias nn='/root/.config/.ww/nr_setupTool_k8s.sh'
 set -o vi
 export EDITOR=vim
 bind 'set show-mode-in-prompt on'
-bind 'set vi-ins-mode-string \1\e[6 q\2'  # Vertical bar for insert mode
-bind 'set vi-cmd-mode-string \1\e[2 q\2'  # Block cursor for normal mode
+bind 'set vi-ins-mode-string \1\e[47m\e[30m\2[I]\1\e[0m\2 '  # [I]
+bind 'set vi-cmd-mode-string \1\e[43m\e[30m\2[N]\1\e[0m\2 '  # [N]
 export LS_COLORS=$(echo "$LS_COLORS" | sed 's/tw=[^:]*://; s/ow=[^:]*://')
 
 # === para#bash#.shared_bash#.PS1 ===
