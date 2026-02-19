@@ -148,7 +148,6 @@ if is_inside_pod; then
         move_files "fzf"             "/usr/bin/"
     fi
 fi
-export VIMINIT='source $HOME/.config/.ww/.vimrc'
 export IS_MY_VI_ENV=1  # for my vi
 __source_file() {
     if [ -f $1 ]; then
@@ -171,11 +170,16 @@ alias echo,,='printf "\n\n\n\n\n\n\n\n\n\n"'
 alias nn='/root/.config/.ww/nr_setupTool_k8s.sh'
 
 # === cygwin64#home#bashrc_s#.config#syntax_and_maps#lf_and_vim_mode.sh ===
-set -o vi
-export EDITOR=vim
-bind 'set show-mode-in-prompt on'
-bind 'set vi-ins-mode-string \1\e[47m\e[30m\2[I]\1\e[0m\2 '  # [I]
-bind 'set vi-cmd-mode-string \1\e[43m\e[30m\2[N]\1\e[0m\2 '  # [N]
+if [[ $(uname -s) = CYGWIN* ]]; then
+    echo "This is Cygwin or Moba → vi mode may be slow"
+else
+    echo "This is probably real Linux (Ubuntu etc.) → should be fine"
+    set -o vi
+    export EDITOR=vim
+    bind 'set show-mode-in-prompt on'
+    bind 'set vi-ins-mode-string \1\e[47m\e[30m\2[I]\1\e[0m\2 '  # [I]
+    bind 'set vi-cmd-mode-string \1\e[43m\e[30m\2[N]\1\e[0m\2 '  # [N]
+fi
 export LS_COLORS=$(echo "$LS_COLORS" | sed 's/tw=[^:]*://; s/ow=[^:]*://')
 
 # === para#bash#.shared_bash#.PS1 ===
@@ -1219,6 +1223,24 @@ __guardFunc() {
     trap "date +%s%3N > '$last_exit_file'" RETURN
     "$func_name" "$@"
 }
+__guardFunc() {
+    local func_name="$1"; shift
+    local last_exit_file="/tmp/guard_${func_name}_last_exit"
+    local min_interval=500
+    local current_time=$(date +%s%3N)
+    local last_exit=0
+    [[ -f "$last_exit_file" ]] && last_exit=$(cat "$last_exit_file")
+    local time_diff=$((current_time - last_exit))
+    if [[ $time_diff -lt $min_interval ]]; then
+        echo "[$func_name] Too soon (${time_diff}ms), skipping"
+        return
+    fi
+    local old_trap
+    old_trap=$(trap -p RETURN)
+    trap "date +%s%3N > '$last_exit_file'" RETURN
+    "$func_name" "$@"
+    eval "${old_trap:-trap - RETURN}"
+}
 export -f __BashFunc1Impl
 export -f __BashFunc2Impl
 export -f __BashFunc3Impl
@@ -1383,7 +1405,7 @@ ww_big_menu() {
     __choose_option cmd_map exp_map "dont_edit_command"
 }
 printf "$BGreen Use 🔗🔗 jj 🔗🔗\n$NC"
-bind '"jj":"__guardFunc ww_big_menu\n"'
+bind -x '"jj":"__guardFunc ww_big_menu"'
 
 # === cygwin64#home#bashrc_s#.config#fzf#fzf_my_funcs.sh ===
 IS_FUNCTIONS_LIST_INITIALIZED=0
@@ -1617,7 +1639,7 @@ if [[ -n $is_print_largefile ]]; then
         cd /var/log/pw-share/pods/stack/dunode02/ && find . -type f -size +20M -printf "%s %p\n" | awk '{printf "DU2: %6dMB | %s\n", ($1/1024/1024), $2}'
     fi
     if [[ -n $is_print_ricIndication ]]; then
-        ww_ric_indication_show 2
+        ww_ric_indication_show 4
     fi
     cd "$ORIGINAL_DIR"    # Return to the original directory
 } #
