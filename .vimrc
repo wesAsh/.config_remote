@@ -23,6 +23,9 @@ if (1 == $IS_MY_VI_ENV)
     endif
     set paste
     set nowrapscan
+    set ignorecase
+	set smartcase
+	set cursorline
     
     nnoremap q :q<CR>
     nnoremap e :q<CR>

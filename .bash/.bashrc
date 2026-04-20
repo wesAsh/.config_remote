@@ -1378,6 +1378,10 @@ ww_big_menu() {
         cmd_map["d"]="__declare_p"
         exp_map["d"]="yman"
     elif [ "cygwin" == "$TERM_NAME" ]; then
+        cmd_map["r"]="__remote_menu"
+        exp_map["r"]="REMOTE ssh, set, etc"
+        cmd_map["w"]="my_ww_functions_search"
+        exp_map["w"]="all functions that start in ww_"
         cmd_map["g"]="_git_commands"
         exp_map["g"]="wdgmdg git commands"
         cmd_map["d"]="__declare_p"
@@ -2220,6 +2224,10 @@ ww_git_update_config()
 
 # === cygwin64#home#bashrc_s#git_stuff#git_aliases.sh ===
 #!/bin/bash
+goto_git_root() {
+    local dir
+    dir=$(git rev-parse --show-toplevel 2>/dev/null) && cd "$dir"
+}
 function githelp() {
     echo "git branch -a   # will show remote and local"
     echo "git branch -vv  # will show remote and local"
@@ -2344,10 +2352,30 @@ ww_git_show_pr_commits() {
     echo -e "\nPR commits:"
     git log --format="%ad   %p   %h | %s" --date=format:'%Y_%m_%d %H:%M' "${merge_sha}^1..${merge_sha}^2"
 }
-if false; then
-    git log --merges --oneline --ancestry-path <commit-sha>..develop
-    git log --merges --oneline --ancestry-path e2cf8b68c1..develop
-fi
+ww_need_TODO()
+{
+    git checkout HEAD -- $(git diff --name-only --diff-filter=D HEAD)
+    cksum  $(git diff --name-only --diff-filter=D HEAD)
+    cksum  $(git diff --name-only --diff-filter=D)
+}
+ww_git_branch_choose() {
+  local branch
+  branch=$(
+    git branch --sort=-committerdate \
+      --format='%(refname:short)|%(committerdate:relative)|%(subject)' \
+      2>/dev/null \
+    | column -t -s '|' \
+    | fzf \
+        --height=40% \
+        --reverse \
+        --prompt="checkout > " \
+        --preview='git log --oneline --graph --color=always -20 {1}' \
+        --preview-window=right:50% \
+    | awk '{print $1}'
+  )
+  [[ -z "$branch" ]] && return 0
+  git checkout "$branch"
+}
 
 # === para#bash#.shared_bash#_kubectl ===
 #!/bin/bash

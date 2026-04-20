@@ -2,14 +2,10 @@ watch      kubectl get pods -n pw    # bcs 'watch kg' with alias won't work...
 watch -n 4 kubectl get pods -n pw
 uptime && who && w
 ww_elapsed_time_watch_try 10 show_large_files show_ric_indication
-ww_elapsed_time_watch  4
-ww_watch_elapsed_time_2        # watch every 2 seconds
-ww_watch_elapsed_time_4        # watch every 4 seconds
-check_process_sockets_cu
-check_process_sockets_du
 ww_elapsed_time_          # 1 time
 ww_elapsed_time_extend    # 1 time
-ww_watch_elapsed_time_extend_4
+check_process_sockets_cu
+check_process_sockets_du
 ww_ric_indication_show
 for f in /root/cu/nrlogs/*.log;   do tail -n 100 "$f" | grep -w "RIC Indication sent to RIC" && echo "Match in $f"; done
 for f in /root/du02/nrlogs/*.log; do tail -n 100 "$f" | grep -w "RIC Indication sent to RIC";  done
@@ -33,8 +29,17 @@ RIC_IP="10.166.9.169"   # ric-109
 RIC_IP="10.166.11.179"  # ric-103
 RIC_IP="10.166.11.81"   # Evyatar's
 RIC_IP="10.166.10.88"   # RickyGal
+RIC_IP="10.166.51.29"   # Yishai's
+time ./docker-create.sh ubuntu && time ./docker-run.sh ubuntu ▪ ildevdocker
+goto_git_root && ./scripts/clang-format/run-clang-format.sh --diff --path=./   ▪ ildevdocker
+make scf.dist                   #▪ ilks 2026_03
+./.help/make_compile.sh user    ▪ ildevdocker compile user sctp
+./.help/make_compile.sh kernel  ▪ ildevdocker compile kernel sctp
+vim .help/make_compile.sh       ▪ ildevdocker
+git_clean_dfx_with_prompt                       ▪ ildevdocker
+make clean && git_clean_dfx_with_prompt         ▪ ildevdocker
 watch -n 1 'conntrack -L -p sctp'   # connection ESTABLISHED or CLOSED etc
-lfrc_r33_linux_amd64 /proc/$(pidof gnb_du_e2du)
+lfrc_linux_r40 /proc/$(pidof gnb_du_e2du)
 ps -o ppid= -p $(pidof dumgr)   # find PPID (the parent is oammgr)
 vi       /root/du/nrlogs/gnb_du_layer2.log
 tail -f /root/du/nrlogs/gnb_du_layer2.log
@@ -42,7 +47,7 @@ tail -f /var/log/pw-share/pods/stack/cunode01/nrlogs/e2cu_main
 vi /root/.config/.bash/.commands_for_fzf.sh
 vi /root/du/messages
 tail -f /root/du/messages
-cd /opt/pw/didir/di-files/ && ls -all 
+cd /opt/pw/didir/di-files/ && ls -all
 mkdir -p /opt/pw/didir/di-files/ && touch /opt/pw/didir/di-files/uploadstop   ▪ not inside CU/DU pod? @ gdb core crash @ bash@ keep core files in zip at that dir
 mv /staging/crashes/core* /var/log/                     ▪ inside CU/DU pod @ gdb core crash @ bash@
 gdb /opt/pw/nrstack/exec/gNB_CU/bin/gnb_cu_l3 core      ▪ inside CU/DU pod @ gdb core crash @ bash@
@@ -137,17 +142,9 @@ your_command > output.txt 2>&1          # Save stdout + stderr to file WITHOUT p
 your_command 2>&1 | tee -a output.log   # redirect both stdout and stderr to file while still printing to console
 pod_str="bbu";pod_name=$(kubectl get pods -n pw | grep $pod_str | awk '{print $1}');kubectl exec -c bbu-container -it $pod_name -n pw -- /bin/bash  ▪ enter bbu pod
 pod_str="ptp";pod_name=$(kubectl get pods -n pw | grep $pod_str | awk '{print $1}');kubectl exec -it $pod_name -n pw -- /bin/bash   ▪ enter ptp pod
-cd /work/wshabso/kernelSCTP/nr-stack/                         ▪ ildevdocker kernel sctp
-cd /work/wshabso/BBBBB/nr-stack/                              ▪ ildevdocker user sctp
-time ./docker-create.sh ubuntu && time ./docker-run.sh ubuntu ▪ ildevdocker
-./.help/make_compile.sh user    ▪ ildevdocker compile user sctp
-./.help/make_compile.sh kernel  ▪ ildevdocker compile kernel sctp
-vim .help/make_compile.sh       ▪ ildevdocker
-git_clean_dfx_with_prompt                       ▪ ildevdocker
-make clean && git_clean_dfx_with_prompt         ▪ ildevdocker
-scp nr_stack.tar.gz root@10.166.56.104:/root/.config/nr/   ▪ ildevdocker copy to Laso
-scp nr_stack.tar.gz root@10.166.74.94:/root/.config/nr/    ▪ ildevdocker copy to Trophy
-scp nr_stack.tar.gz root@10.166.74.80:/root/.config/nr/    ▪ ildevdocker copy to REMOTE_vacuum
+scp ./build-scf-icc/Packaging/nr_stack.tar.gz root@10.166.56.104:/root/.config/nr/   #▪ ilks to Laso
+scp ./build-scf-icc/Packaging/nr_stack.tar.gz root@10.166.74.94:/root/.config/nr/    #▪ ilks to Trophy
+scp ./build-scf-icc/Packaging/nr_stack.tar.gz root@10.166.74.80:/root/.config/nr/    #▪ ilks to Vacuum
 grep "Data rate" /var/log/pw-share/pods/stack/dunode02/nrlogs/gnb_du_layer2.log
 grep "Data rate" /var/log/pw-share/pods/stack/dunode02/nrlogs/gnb_du_layer2.log | grep -E -v "MAC\(0...\/0...\) RLC\(0...\/0...\)"
 sudo dmidecode -s system-serial-number    # get vBBU serial not python..

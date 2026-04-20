@@ -2,7 +2,7 @@
  source /$TERM_ROOT/c/ws/cygwin64/home/bashrc_s/git_stuff/git_prompt_03.sh
  git fetch && git reset --hard @{u}   ▪ reset to following branch
  git reset --hard @{u}                ▪ reset to following branch
- git reset --hard origin/$BRANCH      ▪ reset to 
+ git reset --hard origin/$BRANCH      ▪ reset to
  git fetch --prune && git rebase origin/develop  ▪
  git restore --staged f  ▪ unstage added file
  git merge origin/develop                        ▪
@@ -10,6 +10,11 @@
  ww_git_delete_current_local_branch   ▪ git branch delete
  ww_git_show_pr_commits               ▪ git Show commits from a PR given the merge commit SHA
  git checkout --detach                ▪ git detach HEAD
+ git switch -                ▪ git back to previous branch
+git commit --amend --no-edit   ▪  after git add
+git commit --amend -edit   # to check      ▪ 
+git checkout HEAD -- $(git diff --name-only --diff-filter=D HEAD)   ▪ 
+                ▪ 
  git stash  ▪ TODO!
  git reset file  ▪ revert git add (if modified will stay modified)
  git_touch_last_commit_and_modified  ▪ safe with prompt
@@ -23,8 +28,8 @@
  git branch -vv                              ▪
  git branch -vv | grep ': gone]' ▪  list all local branches whose tracked remote branches have been deleted/gone
  git status --untracked-files=all | grep -v ._UG#_Store  ▪ #
- git add -u  ▪ # --update -> all tracked files (not new files) ▪ 
- git ls-files -o --exclude-standard ▪ # list files that will be added (untracked) 
+ git add -u  ▪ # --update -> all tracked files (not new files) ▪
+ git ls-files -o --exclude-standard ▪ # list files that will be added (untracked)
 	git show abc1234:src/main.cpp > main.cpp         ▪ show file content from some commit
 	                                                       ▪
 glo_oneline_formated --author='Wesley'	                       ▪ 
@@ -53,24 +58,26 @@ glo_oneline_formated --author='Wesley'	                       ▪
  git rev-parse --short FullHashCommit     ▪ print short version of commit hash
 	eval $(ssh-agent -s)                     ▪ for my git push...
 	ssh-add /home/wshabso/.ssh/id_2023_12_06 ▪ for git in PW
- git --help ▪ # 
+ git --help ▪ #
 	          ▪
   ▪
  sort filename | uniq -c  ▪ count the number of times each unique line appears
  uniq -c file             ▪ count the number of times each unique line appears (file should be sorted)
  EDIT_COMMAND_RENDER="add_to_history" ▪ then populate with up arrow key
  EDIT_COMMAND_RENDER="edit_command"   ▪ edit the command but not with completion etc
- EDIT_COMMAND_RENDER="execute_as_is"  ▪ 
- vim --servername GVIM --remote-send  '<C-W>:e C:/ws/cygwin64/home/bashrc_s/learn/awk/ex01.sh' ▪ 
+ EDIT_COMMAND_RENDER="execute_as_is"  ▪
+ vim --servername GVIM --remote-send  '<C-W>:e C:/ws/cygwin64/home/bashrc_s/learn/awk/ex01.sh' ▪
  awk '{print $1, $2}' file01.txt  ▪ print certain words with comma seperated
  awk '/^cpu/ {print $1, $2}' file01.txt   ▪ grep + print words..
-   ▪ 
- echo "$PWD" | sed 's/\/cygdrive\/c/C:/; s/\/drives\/c/C:/'  ▪ 
+   ▪
+ echo "$PWD" | sed 's/\/cygdrive\/c/C:/; s/\/drives\/c/C:/'  ▪
  echo $PATH  | sed 's/:/\n/g'    ▪ show PATH line by line
+ echo %PATH% | sed 's/;/\n/g'    ▪ show PATH line by line cmd
  $env:path -replace ';', "`n"   ▪ print $PATH in powershell line by line
  sed -i '/^\s*$/d' file  ▪ --in-place, delete black lines from file
  sed -i '/gnb_cp_unpack_/d'; '/gnb_cp_pack_/d'; '/ gnb_il_parse_/d' *.log
  sed -i '/^Discarding log.*$/d; /^\s*$/d; /^No space available:.*$/d' gnb_cu_e2cu.log   ▪ --in-place, delete multiple lines by patterns
+ sed -i '5d' file.txt   ▪ --in-place, delete line by number
  perl -pe 's/pattern/replacement/'   ▪ -p: processes each line of input, -e: executes the given Perl code.
  tar --exclude="unwanted_file.txt" -xzvf zipFile.tar.gz  ▪ Exclude While Extracting 
  tar --exclude="unwanted_file.txt" -czvf new.tar.gz      ▪ Exclude While Creating   
@@ -88,6 +95,7 @@ glo_oneline_formated --author='Wesley'	                       ▪
  wget URL ▪ download
  for f in *\ *; do mv "$f" "${f// /_}"; done ▪ # rename by replace space to dash
  for f in *\ *; do echo $f; done # just echo example rename
+ find . -maxdepth 2 -type f  ▪ find depth
  find_files_changed_last_X_minutes -60  ▪ files modified last 60min (hour)
  find_files_changed_last_X_day     -0.8 ▪ files modified last 0.8 day (0.8 * 24 * 60 minutes)
   ▪
@@ -97,13 +105,15 @@ glo_oneline_formated --author='Wesley'	                       ▪
  find2 -type f -mtime -1.5  ▪   in days (24 hours)
  find . -type f -mtime -0.1  ▪ in days (24 hours) ∙∙! -path "*\.git\/*"∙∙
  find . -type f -mtime -0.1  ▪\n in days (24 hours) ∙∙! -path "*\.git\/*"∙∙
- find . -type f -mmin -60 ! -path "*\.git\/*"    ▪ in minutes find 
- find . -type f -mtime -0.1 ! -path "*\.git\/*"  ▪ in days (24 hours) find 
+ find . -type f -mmin -60 ! -path "*\.git\/*"    ▪ in minutes find
+ find . -type f -mtime -0.1 ! -path "*\.git\/*"  ▪ in days (24 hours) find
  find . -type f -not -path "*\.git\/*"           ▪ find no git
  find . \( -name "*.c" -o -name "*.h" -o -name "*.cpp" -o -name "*.hpp" \) -type f >> __ALL_FILES      ▪
   ▪
   find . -type f -empty           ▪# check for empty files (no delete) 
   find . -type f -empty -delete   ▪# delete empty files                
+  find . -type f -name "\._UG#_Store"              ▪# find by name   
+  find . -type f -name "\._UG#_Store" -delete      ▪# find delete    
   ▪
   ▪
  ugrep_01                              -rl "" ▪ Show which files it will search
@@ -143,19 +153,20 @@ glo_oneline_formated --author='Wesley'	                       ▪
  ctags.exe  -R --fields=+l --c-kinds=+lp --c++-kinds=+lp ./*                        ▪ ctags # generate tags for cpp file
  ctags -R --c++-kinds=+p --fields=+iaS --extra=+q --exclude=\./QAFramework/  ./     ▪ ctags
  dos2unix tags && wc -l tags  ▪ after ctags
- scp wshabso@ilks-dockerpool:/work/wshabso/devWA/unitTest/e2cu_ut_frwk/logs/*     ./  ▪ # 
- scp wshabso@ilks-dockerpool:/work/wshabso/devWA/unitTest/e2cu_ut_frwk/build_out* ./  ▪ # 
- scp wshabso@ilks-dockerpool:/work/wshabso/devWA/diff_2025_09_docker ./  ▪ # 
+ scp wshabso@ilks-dockerpool:/work/wshabso/devWA/unitTest/e2cu_ut_frwk/logs/*     ./  ▪ #
+ scp wshabso@ilks-dockerpool:/work/wshabso/devWA/unitTest/e2cu_ut_frwk/build_out* ./  ▪ #
+ scp wshabso@ilks-dockerpool:/work/wshabso/devWA/diff_2025_09_docker ./  ▪ #
  scp $REMOTE_VACUUM:/root/.config/nr/logs/* .        ▪ # scp logs
  scp $REMOTE_TROPHY:/root/.config/nr/logs/* .        ▪ # scp logs
  scp $REMOTE_LOG_SERVER_01:/mnt/LOGdrive/wshabso/ .        ▪ # scp logs PR
+./scripts/clang-format/run-clang-format.sh --diff --path=./      ▪  in the docker
 	grep -i "signal" iprs_pstack_*                                 ▪ 
- tmux ls ▪ # 
- tmux -u new-session -s ssy_git  ▪ -u for utf-8 
- python C:/ws/para/bash/.shared_bash/clean_files.py  ▪ clean bash 
- a  ▪ # 
+ tmux ls ▪ #
+ tmux -u new-session -s ssy_git  ▪ -u for utf-8
+ python C:/ws/para/bash/.shared_bash/clean_files.py  ▪ clean bash
+ a  ▪ #
  printf "len of variable str is ${#str} \n"  ▪ learn: len of variable
- a  ▪ # 
+ a  ▪ #
  rm bin_reader duoam      dumgr     gnb_du_e2du gnb_du_layer2
  rm bin_reader gnb_cu_oam gnb_cu_l3 gnb_cu_e2cu gnb_cu_pdcp   gnb_cu_rrm gnb_cu_son
  __my_tshark_yman     controlplane_cu.pcap0  pcap_cu_0
@@ -163,14 +174,14 @@ glo_oneline_formated --author='Wesley'	                       ▪
  tcpdump -i any sctp -w /var/log/pw-share/pods/stack/cunode01/cu_sctp.pcap &
  tcpdump -i any sctp -c 1000 -w /var/run/nrlogs/pcaps/cu_sctp.pcap &
  tcpdump -i any sctp -c 1000 -w /var/run/nrlogs/pcaps/du_sctp.pcap &
- ▪ 
+ ▪
  tasklist | grep -E "cmd|bash" ▪ works with cygwin, process list
  tasklist | wc -l  ▪ process list
  taskkill /F /PID PID ▪ kill process
  wmic process get parentprocessid,processid,executablepath ▪ process list
  wmic process get parentprocessid,processid,executablepath,WorkingSetSize | grep -E "chrome\.exe"  ▪ process list
- ▪ 
- ▪ 
+ ▪
+ ▪
 	PID_IPRSD=$(GetIprsPID_from_file) && echo $PID_IPRSD    ▪  kill
 	cd /var/iprs/log/iprsd/ && lag $PID_IPRSD               ▪ 
 	PID_IPRSD=$(GetIprsPID_from_file) && echo $PID_IPRSD && kill -USR1 $PID_IPRSD   # to reload iprsd.ini   ▪ 
