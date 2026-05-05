@@ -74,6 +74,7 @@ glo_oneline_formated --author='Wesley'	                       ▪
  echo $PATH  | sed 's/:/\n/g'    ▪ show PATH line by line
  echo %PATH% | sed 's/;/\n/g'    ▪ show PATH line by line cmd
  $env:path -replace ';', "`n"   ▪ print $PATH in powershell line by line
+ $env:PATH -split ';' | Where-Object { $_ -ne '' } | Sort-Object   ▪ print $PATH in powershell line by line sorted
  sed -i '/^\s*$/d' file  ▪ --in-place, delete black lines from file
  sed -i '/gnb_cp_unpack_/d'; '/gnb_cp_pack_/d'; '/ gnb_il_parse_/d' *.log
  sed -i '/^Discarding log.*$/d; /^\s*$/d; /^No space available:.*$/d' gnb_cu_e2cu.log   ▪ --in-place, delete multiple lines by patterns
@@ -147,6 +148,7 @@ glo_oneline_formated --author='Wesley'	                       ▪
 	perl -e 'for(<applog_0*>){((stat)[9]<(unlink))}'               ▪  # one of best ways to remove huge amount of files (even when rm don't work)
 	rsync --relative  Alpha/Lib/yourFile.cpp dir1/dir1son/         ▪  # like cp --parents   - works on solaris sparc
  time ctags --options=.ctags -R . && dos2unix tags && wc -l tags          ▪ ctags working
+ time ctags --exclude=*.json --exclude=gnbstack/common/orane2 -R . && dos2unix tags && wc -l tags          #▪ ctags working (~32sec, ~172000 tags)
  wc -l tags && time ctags --exclude=*.json -R . && dos2unix tags && wc -l tags          ▪ ctags working
  time ctags -R . && dos2unix tags && wc -l tags          ▪ ctags working
  ctags -R -f tags asn_enc_dec/ orane2/ security/          ▪ ctags working

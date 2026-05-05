@@ -169,17 +169,7 @@ __source_file() {
 alias echo,,='printf "\n\n\n\n\n\n\n\n\n\n"'
 alias nn='/root/.config/.ww/nr_setupTool_k8s.sh'
 
-# === cygwin64#home#bashrc_s#.config#syntax_and_maps#lf_and_vim_mode.sh ===
-if [[ $(uname -s) = CYGWIN* ]]; then
-    echo "This is Cygwin or Moba → vi mode may be slow"
-else
-    echo "This is probably real Linux (Ubuntu etc.) → should be fine"
-    set -o vi
-    export EDITOR=vim
-    bind 'set show-mode-in-prompt on'
-    bind 'set vi-ins-mode-string \1\e[47m\e[30m\2[I]\1\e[0m\2 '  # [I]
-    bind 'set vi-cmd-mode-string \1\e[43m\e[30m\2[N]\1\e[0m\2 '  # [N]
-fi
+# === cygwin64#home#bashrc_s#.config#syntax_and_maps#syntax_01.sh ===
 export LS_COLORS=$(echo "$LS_COLORS" | sed 's/tw=[^:]*://; s/ow=[^:]*://')
 
 # === para#bash#.shared_bash#.PS1 ===
