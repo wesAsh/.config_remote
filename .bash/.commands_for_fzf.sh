@@ -4,6 +4,7 @@ uptime && who && w
 ww_elapsed_time_watch_try 10 show_large_files show_ric_indication
 ww_elapsed_time_          # 1 time
 ww_elapsed_time_extend    # 1 time
+ls -l | awk 'NR>1 {printf "%s | %.2f MB | %s |\n", $7, $6/1024/1024, $9}'  #▪ example: 2026-05-11 | 4.93 MB | 22f5886e-a746-45d2-a754-36c31b41d3e4.jsonl |
 check_process_sockets_cu
 check_process_sockets_du
 ww_ric_indication_show

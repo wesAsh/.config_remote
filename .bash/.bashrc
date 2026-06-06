@@ -14,10 +14,71 @@ __append_block_to_file() {
         echo "Already exists by first line: $first_line"
     fi
 }
-ww_prepare_bash() {
+ww_prepare_bash_old_than_2026_06() {
 __append_block_to_file "$HOME/.vimrc" \
 'if (filereadable("/root/.config/.vimrc"))
     source /root/.config/.vimrc
+endif'
+__append_block_to_file "$HOME/.bashrc" \
+'# ∙ww
+alias src,,="source ~/.config/.ww/.bash/.bashrc"
+HISTIGNORE=":  *:src,,:h:history:lfr*"
+'
+    cd ~
+    if [ -f ~/lfrc_linux ]; then
+        mv lfrc_linux lfrc && chmod 666 lfrc && mkdir --parents .config/lf/ && mv lfrc .config/lf/
+        echo "moved lfrc_linux to ~/.config/lf/"
+    fi
+    cd ~
+    printf "${BGreen}cp configs:${NC}\n"
+    if [ -d .config/.ww/ ] && [ -f .config/.ww/.tmux.conf ]; then
+        mkdir --parents .config/tmux/ && cp .config/.ww/.tmux.conf .config/tmux/
+        echo "    cp ~/.config/.ww/.tmux.conf  ~/.config/tmux/"
+    fi
+    if [ -d .config/.ww/ ] && [ -f .config/.ww/lfrc_linux ]; then
+        mkdir --parents .config/lf/ && cp .config/.ww/lfrc_linux .config/lf/lfrc
+        echo "    cp ~/.config/.ww/lfrc_linux  ~/.config/lf/lfrc"
+    fi
+    if [ -d .config/.ww/ ] && [ -f .config/.ww/.vimrc ]; then
+        cp .config/.ww/.vimrc  .config/
+        echo "    cp ~/.config/.ww/.vimrc      ~/.config/.vimrc"
+    fi
+    printf "${BGreen}Downlowd lf and fzf:${NC}\n"
+    echo "    wget https://github.com/gokcehan/lf/releases/download/r36/lf-linux-amd64.tar.gz"
+	echo "    wget https://github.com/junegunn/fzf/releases/download/v0.65.1/fzf-0.65.1-linux_amd64.tar.gz"
+    MY_FILE=~/lfrc_r33_linux_amd64
+    if [ -f $MY_FILE ]; then
+        if ! mv $MY_FILE /usr/bin/; then
+            if mv $MY_FILE ~/.config/; then
+                alias lfrc_r33_linux="~/.config/lfrc_r33_linux_amd64"
+                echo "created alias for lfrc:"
+                alias lfrc_r33_linux
+            else
+                echo "cant even move $FILE to ~/.config ???"
+            fi
+        else
+            echo "moved $MY_FILE to /usr/bin/"
+        fi
+    fi
+    MY_FILE=~/fzf-0.55.0-linux_amd64
+    if [ -f $MY_FILE ]; then
+        if ! mv $MY_FILE /usr/bin/fzf; then
+            if mv $MY_FILE ~/.config/; then
+                alias fzf="~/.config/fzf-0.55.0-linux_amd64"
+                echo "created alias for fzf:"
+                alias fzf
+            else
+                echo "cant even move $FILE to ~/.config ???"
+            fi
+        else
+            echo "moved fzf to /usr/bin/"
+        fi
+    fi
+}
+ww_prepare_bash_2026_06() {
+__append_block_to_file "$HOME/.vimrc" \
+'if (filereadable(expand("$HOME/.config/.vimrc")))
+    exe "source" . expand("$HOME/.config/.vimrc")
 endif'
 __append_block_to_file "$HOME/.bashrc" \
 '# ∙ww
@@ -2252,6 +2313,65 @@ function gsm() {
     echo -e "\033[1;33m------------ WA: without listing untracked files ------------\033[0m"
     git status --untracked-files=no "$@"
 }
+git_status_mtime() { # 2026_05_14 --> also show mtime
+    git status --porcelain --untracked-files=no "$@" | while IFS= read -r line; do
+        local status="${line:0:2}"
+        local file="${line:3}"
+        [[ "$file" == *" -> "* ]] && file="${file##* -> }"
+        local mtime
+        mtime=$(date -d @$(stat -c '%Y' "$file" 2>/dev/null) '+%Y_%m_%d %H:%M' 2>/dev/null)
+        printf "%-16s %s %s\n" "${mtime:----_--_-- --:--}" "$status" "$file"
+    done
+}
+git_status_mtime_numstat() {
+    declare -A ns_add ns_del
+    while IFS=$'\t' read -r add del file; do
+        [[ "$add" == '-' ]] && add=0  # binary files
+        [[ "$del" == '-' ]] && del=0
+        ns_add["$file"]=$(( ${ns_add[$file]:-0} + add ))
+        ns_del["$file"]=$(( ${ns_del[$file]:-0} + del ))
+    done < <(
+        git diff         --numstat "$@" 2>/dev/null
+        git diff --cached --numstat "$@" 2>/dev/null
+    )
+    while IFS= read -r line; do
+        local status="${line:0:2}"
+        local file="${line:3}"
+        [[ "$file" == *" -> "* ]] && file="${file##* -> }"
+        local mtime
+        mtime=$(date -d @$(stat -c '%Y' "$file" 2>/dev/null) '+%Y_%m_%d %H:%M' 2>/dev/null)
+        local stats=""
+        [[ -v ns_add[$file] ]] && stats=$(printf '\e[32m+%d\e[0m/\e[31m-%d\e[0m' "${ns_add[$file]}" "${ns_del[$file]}")
+        printf "%-16s %s %-45s %s\n" \
+            "${mtime:----_--_-- --:--}" "$status" "$file" "$stats"
+    done < <(git status --porcelain --untracked-files=no "$@")
+}
+git_status_mtime_numstat() {
+    declare -A ns_add ns_del
+    while IFS=$'\t' read -r add del file; do
+        [[ "$add" == '-' ]] && add=0
+        [[ "$del" == '-' ]] && del=0
+        ns_add["$file"]=$(( ${ns_add[$file]:-0} + add ))
+        ns_del["$file"]=$(( ${ns_del[$file]:-0} + del ))
+    done < <(
+        git diff          --numstat "$@" 2>/dev/null
+        git diff --cached --numstat "$@" 2>/dev/null
+    )
+    while IFS= read -r line; do
+        local status="${line:0:2}"
+        local file="${line:3}"
+        [[ "$file" == *" -> "* ]] && file="${file##* -> }"
+        local mtime
+        mtime=$(date -d @$(stat -c '%Y' "$file" 2>/dev/null) '+%Y_%m_%d %H:%M' 2>/dev/null)
+        local stats=""
+        if [[ -v ns_add[$file] ]]; then
+            local plain="+${ns_add[$file]}/-${ns_del[$file]}"
+            stats=$(printf '\e[32m+%d\e[0m/\e[31m-%d\e[0m' "${ns_add[$file]}" "${ns_del[$file]}")
+            stats=$(printf "%*s" $(( 8 + ${#stats} - ${#plain} )) "$stats")  # pad to width 8 accounting for escape codes
+        fi
+        printf "%-16s %s  %s  %s\n" "${mtime:----_--_-- --:--}" "$status" "${stats:- }" "$file"
+    done < <(git status --porcelain --untracked-files=no "$@")
+}
 ww_git_pull_if_no_change() {
     if ! git diff --quiet && ! git diff --cached --quiet; then
         echo "❌ Tracked files are modified or staged. Commit or stash them before pulling."
@@ -2284,7 +2404,7 @@ alias gitdiff='git diff $COMMIT~ $COMMIT'  # first is Previous and later current
 alias | egrep "git "
 
 # === cygwin64#home#bashrc_s#git_funcs#git_funcs_2025_12.sh ===
-ww_git_delete_current_local_branch() { # added with claude in 2025_12_11
+ww_git_delete_current_local_branch_2025() { # added with claude in 2025_12_11
     clear -x
     local current_branch=$(git branch --show-current)
     if [ -z "$current_branch" ]; then
@@ -2332,6 +2452,90 @@ ww_git_delete_current_local_branch() { # added with claude in 2025_12_11
             return 1
         fi
     fi
+}
+ww_git_delete_current_local_branch() {  # with claude 2026_05_19
+    local BASE_BRANCH="develop"
+    local current_branch upstream_track upstream_ref develop_upstream
+    local behind unmerged_count reply head_sha
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        echo "Error: not inside a git repository." >&2
+        return 1
+    fi
+    if ! git show-ref --verify --quiet "refs/heads/${BASE_BRANCH}"; then
+        echo "Error: base branch '${BASE_BRANCH}' does not exist locally." >&2
+        return 1
+    fi
+    current_branch=$(git symbolic-ref --short -q HEAD || true)
+    if [[ -z "$current_branch" ]]; then
+        echo "Error: HEAD is detached; not on any branch." >&2
+        return 1
+    fi
+    if [[ "$current_branch" == "$BASE_BRANCH" ]]; then
+        echo "You're already on '${BASE_BRANCH}'. Nothing to delete."
+        return 0
+    fi
+    echo "Current branch: $current_branch"
+    local staged_or_modified
+    staged_or_modified=$(git status --porcelain | grep -v '^??' || true)
+    if [[ -n "$staged_or_modified" ]]; then
+        echo "Error: working tree has staged or modified files:" >&2
+        echo "$staged_or_modified" >&2
+        echo >&2
+        echo "Commit, stash, or discard your changes before running this." >&2
+        return 1
+    fi
+    local untracked
+    untracked=$(git status --porcelain | grep '^??' || true)
+    if [[ -n "$untracked" ]]; then
+        echo "Note: untracked files present (ignored for this check)."
+        echo
+    fi
+    echo "Fetching and pruning remote refs..."
+    git fetch --prune --quiet
+    upstream_track=$(git for-each-ref --format='%(upstream:track)' \
+                        "refs/heads/${current_branch}")
+    upstream_ref=$(git for-each-ref --format='%(upstream:short)' \
+                        "refs/heads/${current_branch}")
+    if [[ "$upstream_track" == *"gone"* ]]; then
+        echo "Upstream '$upstream_ref' is gone (deleted on remote). Good."
+    elif [[ -z "$upstream_ref" ]]; then
+        echo "Warning: '$current_branch' has no upstream tracking branch."
+        read -r -p "Continue anyway? [y/N] " reply
+        [[ "$reply" =~ ^[Yy]$ ]] || { echo "Aborted."; return 0; }
+    else
+        echo "Warning: upstream '$upstream_ref' still exists on the remote ($upstream_track)."
+        read -r -p "Continue anyway? [y/N] " reply
+        [[ "$reply" =~ ^[Yy]$ ]] || { echo "Aborted."; return 0; }
+    fi
+    develop_upstream=$(git for-each-ref --format='%(upstream:short)' \
+                            "refs/heads/${BASE_BRANCH}")
+    if [[ -n "$develop_upstream" ]]; then
+        behind=$(git rev-list --count "${BASE_BRANCH}..${develop_upstream}" 2>/dev/null || echo 0)
+        if [[ "$behind" -gt 0 ]]; then
+            echo "Note: local '${BASE_BRANCH}' is $behind commit(s) behind '${develop_upstream}'."
+            echo "      Consider pulling '${BASE_BRANCH}' first for the most accurate check."
+        fi
+    fi
+    local cherry_target="${develop_upstream:-$BASE_BRANCH}"
+    unmerged_count=$(git cherry "$cherry_target" "$current_branch" | grep -c '^+' || true)
+    if [[ "$unmerged_count" -gt 0 ]]; then
+        echo
+        echo "Refusing to delete: '$current_branch' has $unmerged_count commit(s) NOT in '${cherry_target}':"
+        git cherry -v "$cherry_target" "$current_branch" | grep '^+'
+        return 1
+    fi
+    echo "All commits on '$current_branch' are already in '${cherry_target}' (by patch-id)."
+    echo
+    read -r -p "Delete local branch '$current_branch' (will leave HEAD detached)? [y/N] " reply
+    if [[ ! "$reply" =~ ^[Yy]$ ]]; then
+        echo "Aborted."
+        return 0
+    fi
+    head_sha=$(git rev-parse --short HEAD)
+    git checkout --detach
+    git branch -D "$current_branch"
+    echo "Deleted '$current_branch'. HEAD is now detached at $head_sha."
+    echo "Run \`git checkout ${BASE_BRANCH}\` (or any other branch) when ready."
 }
 ww_git_show_pr_commits() {
     clear -x

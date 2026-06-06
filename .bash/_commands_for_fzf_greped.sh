@@ -7,6 +7,7 @@
  git restore --staged f  ▪ unstage added file
  git merge origin/develop                        ▪
  git fetch --prune                               ▪
+ ww_git_delete_current_local_branch_2025   ▪ git branch delete
  ww_git_delete_current_local_branch   ▪ git branch delete
  ww_git_show_pr_commits               ▪ git Show commits from a PR given the merge commit SHA
  git checkout --detach                ▪ git detach HEAD
@@ -61,6 +62,7 @@ glo_oneline_formated --author='Wesley'	                       ▪
  git --help ▪ #
 	          ▪
   ▪
+ ls -l | awk 'NR>1 {printf "%s | %.2f MB | %s |\n", $7, $6/1024/1024, $9}'  #▪ example: 2026-05-11 | 4.93 MB | 22f5886e-a746-45d2-a754-36c31b41d3e4.jsonl |
  sort filename | uniq -c  ▪ count the number of times each unique line appears
  uniq -c file             ▪ count the number of times each unique line appears (file should be sorted)
  EDIT_COMMAND_RENDER="add_to_history" ▪ then populate with up arrow key
@@ -161,6 +163,7 @@ glo_oneline_formated --author='Wesley'	                       ▪
  scp $REMOTE_VACUUM:/root/.config/nr/logs/* .        ▪ # scp logs
  scp $REMOTE_TROPHY:/root/.config/nr/logs/* .        ▪ # scp logs
  scp $REMOTE_LOG_SERVER_01:/mnt/LOGdrive/wshabso/ .        ▪ # scp logs PR
+ scp $REMOTE_HEBE:/root/cu/system_resource_stats.log .     #▪ # 
 ./scripts/clang-format/run-clang-format.sh --diff --path=./      ▪  in the docker
 	grep -i "signal" iprs_pstack_*                                 ▪ 
  tmux ls ▪ #
@@ -176,6 +179,8 @@ glo_oneline_formated --author='Wesley'	                       ▪
  tcpdump -i any sctp -w /var/log/pw-share/pods/stack/cunode01/cu_sctp.pcap &
  tcpdump -i any sctp -c 1000 -w /var/run/nrlogs/pcaps/cu_sctp.pcap &
  tcpdump -i any sctp -c 1000 -w /var/run/nrlogs/pcaps/du_sctp.pcap &
+ ssh wshabso@ilks-pds04   # core oammgr ▪
+ ssh wshabso@ilks-dockerpool   # ▪
  ▪
  tasklist | grep -E "cmd|bash" ▪ works with cygwin, process list
  tasklist | wc -l  ▪ process list
