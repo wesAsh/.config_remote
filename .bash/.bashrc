@@ -267,7 +267,7 @@ else
     PS1='\[\e[1;30;46m\]● \h $SERVER_IP \[\e[1;30;47m\]● #\#: $? ● \D{%H:%M:%S}'
     PS1+='\[\e[0m\] \w/\n● →→'
 fi
-ps1_counter=2
+ps1_counter=3
 ps1_toggle()
 {
     PS1=''
@@ -282,11 +282,15 @@ ps1_toggle()
         PS1='\[\e[0;33m\]\h $SERVER_IP \[\e[0;32m\]$PWD \[\e[0m\]\n'
         PS1+='\[\e[0;47;34m\]$IS_TMUX $IS_DOCKER →→→\[\e[0m\] '
     elif (( 4 == ps1_counter )); then
+        PS1='\[\e[0;33m\]\h $SERVER_IP \[\e[0;32m\]$PWD \[\e[0m\]\n'
+        PS1+='\[\e[0;46;30m\]${IS_TMUX}${IS_DOCKER}${TERM_PROMPT}▶❯\[\e[0m\] '
+    elif (( 5 == ps1_counter )); then
         PS1='\[\e[0;47;31m\]∟($?) \D{%H:%M:%S}\[\e[34m\] $IS_TMUX $IS_DOCKER\[\e[0;33m\] \h $SERVER_IP'
         PS1+='\n#\#● \[\e[0;32m\]$PWD \[\e[0m\]→→→'
-    elif (( 5 == ps1_counter )); then
+    elif (( 6 == ps1_counter )); then
         PS1='\[\e[2;31m\]∟($?) \D{%H:%M:%S}\[\e[0;34m\] $IS_TMUX $IS_DOCKER\[\e[2;33m\] \h $SERVER_IP'
         PS1+='\n#\#● \[\e[0;32m\]$PWD \[\e[0m\]→→→'
+        PS1='\[\e[0;32m\]\w/ \[\e[0;31m\]($?) $IS_TMUX $IS_DOCKER \[\e[1;30;46m\] \h $STY $SERVER_IP \[\e[1;30;47m\] \D{%H:%M:%S}'
     else
         PS1='\n#\#● →→→'
         let "ps1_counter=0"
@@ -2111,8 +2115,7 @@ __Refresh_Files() {
     local FILE2="$COMMANDS_FILE____ORG"
     if ___is_file1_newer_than_file2 "$FILE1" "$FILE2"; then
         echo "grep again on $FILE1"
-        grep "@ bash@"  "$FILE1" | sed 's/@ bash@//' > "$FILE2"
-        is_refreshed="Y"
+is_refreshed="Y"
     fi
     if [ "$FUNCS_FILE____ORG" -nt "$FUNCS_FILE_GREPED" ]; then
         echo "grep again on funcs file (try grep on functions)"
@@ -2186,9 +2189,9 @@ function MyHistory() {
     READLINE_LINE=${CHOSEN_FZF#*$'\t'}
 }
 ____RemoveTrailing() {
+    CHOSEN_FZF="${CHOSEN_FZF%%#▪*}"
     CHOSEN_FZF="${CHOSEN_FZF%%▪*}"
-    CHOSEN_FZF="${CHOSEN_FZF%%   #*}"
-    CHOSEN_FZF=$(echo "$CHOSEN_FZF" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+CHOSEN_FZF=$(echo "$CHOSEN_FZF" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 }
 function MyOpenFiles()
 { #[
@@ -2305,6 +2308,34 @@ glo_oneline_formated_func() {
     fi
     git log --date=format:'%Y_%m_%d %H:%M'   \
         --format='%C(yellow)%ad  %C(red) %<(23)%p %C(cyan)%h %C(blue)| %<(23)%an |%C(reset) %s'   \
+        $num_of_records   \
+        "$@"
+}
+glo_oneline_formated_func_with_separator_1st() {
+    clear -x
+    if [ "$#" -eq 0 ]; then
+        printf "git log --format... ${GREEN}use '-a' to show all, '-4' for 4 etc ${NC}\n"
+        num_of_records="-10"
+    elif [ "$1" == "-a" ]; then
+        num_of_records=""
+    fi
+    echo "| Date             | Parent                | Commit    | Author                   | Message"
+    git log --date=format:'%Y_%m_%d %H:%M'   \
+        --format='%C(yellow)| %ad |%C(red) %<(21)%p | %C(cyan)%h %C(blue)| %<(23)%an |%C(reset) %s'   \
+        $num_of_records   \
+        "$@"
+}
+glo_oneline_formated_func_with_separator() {
+    clear -x
+    if [ "$#" -eq 0 ]; then
+        printf "git log --format... ${GREEN}use '-a' to show all, '-4' for 4 etc ${NC}\n"
+        num_of_records="-10"
+    elif [ "$1" == "-a" ]; then
+        num_of_records=""
+    fi
+    echo "| Date             | Commit (parents + curr LTR)        | Author                   | Message"
+    git log --date=format:'%Y_%m_%d %H:%M'   \
+        --format='%C(yellow)| %ad |%C(red) %<(21)%p   %C(cyan)%h %C(blue)| %<(23)%an |%C(reset) %s'   \
         $num_of_records   \
         "$@"
 }
