@@ -1157,7 +1157,12 @@ __tmux_create_or_attach_to_session_prev() {
     tmux attach -t "$SESSION_NAME"
 }
 ____get_tmux_conf_path() {
-    local file_path="/root/.config/tmux/.tmux.conf"
+    local file_path="$HOME/.config/tmux/.tmux.conf"
+    if [ -f "$file_path" ]; then 
+        TMUX_CONF_PATH="$file_path"
+        return
+    fi
+    file_path="/root/.config/tmux/.tmux.conf"
     if [ -f "$file_path" ]; then 
         TMUX_CONF_PATH="$file_path"
         return
