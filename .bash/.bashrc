@@ -2114,7 +2114,7 @@ __Refresh_Files_Commands() {
     fi
     return -1
 }
-__Refresh_Files() {
+__Refresh_Files_Prev() {
     local is_refreshed=""
     local FILE1="$COMMANDS_FILE__BKMRK"
     local FILE2="$COMMANDS_FILE____ORG"
@@ -2136,6 +2136,29 @@ if [ "$MOBA_SSH_SETUPS____ORG" -nt "$MOBA_SSH_SETUPS_GREPED" ]; then
         is_refreshed="Y"
     fi
     if [[ $is_refreshed == "Y" ]]; then echo "sleep..."; sleep 2; fi
+}
+__Refresh_Files() {
+    local is_refreshed=""
+    if ___is_file1_newer_than_file2 "$COMMANDS_FILE__BKMRK" "$COMMANDS_FILE____ORG"; then
+        echo "grep again on $COMMANDS_FILE__BKMRK"
+        is_refreshed="Y"
+        grep "@ bash@"  "$COMMANDS_FILE__BKMRK" | sed -e 's/^@ bash@ //'  -e 's/[[:space:]]*@ bash@[[:space:]]*/ /g' > "$COMMANDS_FILE____ORG"
+        sed -i 's/[[:space:]]*▪[[:space:]]*$//' "$COMMANDS_FILE____ORG"
+    fi
+    if [ "$FUNCS_FILE____ORG" -nt "$FUNCS_FILE_GREPED" ]; then
+        echo "grep again on funcs file (try grep on functions)"
+        is_refreshed="Y"
+        grep -E "^[a-z,A-Z,_]{4,}()" "$FUNCS_FILE____ORG" > "$FUNCS_FILE_GREPED"
+        sed -i 's/()//g; s/^function //g' "$FUNCS_FILE_GREPED"
+    fi
+    if __Refresh_Files_Commands "$COMMANDS_FILE____ORG"        "$COMMANDS_FILE_GREPED";        then is_refreshed="Y"; fi
+    if __Refresh_Files_Commands "$COMMANDS_FILE_REMOTE____ORG" "$COMMANDS_FILE_REMOTE_GREPED"; then is_refreshed="Y"; fi
+    if [ "$MOBA_SSH_SETUPS____ORG" -nt "$MOBA_SSH_SETUPS_GREPED" ]; then
+        echo "grep again on MOBA_SSH_SETUPS file"
+        grep -E "^\s*REMOTE" "$MOBA_SSH_SETUPS____ORG" > "$MOBA_SSH_SETUPS_GREPED"
+        is_refreshed="Y"
+    fi
+    if [[ $is_refreshed == "Y" ]]; then echo "sleep 2 after refresh..."; sleep 2; fi
 }
 __get_combined_content() {
     if [ -f "$COMMANDS_FILE_GREPED" ]; then
