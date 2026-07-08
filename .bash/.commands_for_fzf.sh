@@ -39,6 +39,8 @@ make scf.dist                   #▪ ilks 2026_03
 vim .help/make_compile.sh       ▪ ildevdocker
 git_clean_dfx_with_prompt                       ▪ ildevdocker
 make clean && git_clean_dfx_with_prompt         ▪ ildevdocker
+cd /opt/pw/nrstack/exec/gNB_DU/bin/ && ./runDuPythonCli.sh    # inside DU pod
+cd /opt/pw/nrstack/exec/gNB_CU/bin/ && ./runDuPythonCli.sh    # inside CU pod
 watch -n 1 'conntrack -L -p sctp'   # connection ESTABLISHED or CLOSED etc
 lfrc_linux_r40 /proc/$(pidof gnb_du_e2du)
 ps -o ppid= -p $(pidof dumgr)   # find PPID (the parent is oammgr)
