@@ -1,5 +1,6 @@
 __update_ugrep_indexes  ▪ safe ugrep
 source /$TERM_ROOT/c/ws/cygwin64/home/bashrc_s/git_stuff/git_prompt_03.sh
+git fetch origin
 git fetch && git reset --hard @{u}   ▪ reset to following branch
 git reset --hard @{u}                ▪ reset to following branch
 git reset --hard origin/$BRANCH      ▪ reset to
@@ -61,6 +62,11 @@ git rev-parse --short FullHashCommit     ▪ print short version of commit hash
  eval $(ssh-agent -s)                     ▪ for my git push...
  ssh-add /home/wshabso/.ssh/id_2023_12_06 ▪ for git in PW
 git --help ▪ # 
+ ascii_art --font smblock Hello
+ ascii_art --font future Hello
+ ascii_art --nice Hello
+ alias ascii_art="C:/Users/wshabso/AppData/Local/nvim/my_config/scripts/figlet-nice.sh"
+ alias ascii_art="~/.config/nvim/my_config/scripts/figlet-nice.sh"
 ls -l | awk 'NR>1 {printf "%s | %.2f MB | %s |\n", $7, $6/1024/1024, $9}'  #▪ example: 2026-05-11 | 4.93 MB | 22f5886e-a746-45d2-a754-36c31b41d3e4.jsonl |
 sort filename | uniq -c  ▪ count the number of times each unique line appears
 uniq -c file             ▪ count the number of times each unique line appears (file should be sorted)
@@ -87,6 +93,7 @@ perl -pe 's/pattern/replacement/'   ▪ -p: processes each line of input, -e: ex
   date +"%Y_%m_%d %H:%M:%S"    ▪ print date 
  ln -s  /home/user/my_directory my_link  ▪ create soft link 
  ln -sf /home/user/my_directory my_link  ▪ overwrite an existing soft link 
+python -m zipfile -e <>.zip  . ▪ if unzip not available (gunzip if for .gz)
 tar -czvf  ▪ to tar,   args: zipFile.tar.gz file1 file1  , to zip
 tar -xzvf  ▪ to untar, args: zipFile.tar.gz file1
 tar -xzvf zipFile.tar.gz file1                 ▪ # to untar
@@ -180,15 +187,17 @@ ssh wshabso@ilks-dockerpool   #
 claude --resume <SessionID>    #
 claude update   # == upgrade ▪ boom 
 claude stam     # this won't be removed  ▪ but this one will 
+herdr --session        DOCKER_pds02_80c15fdd149a
+herdr --session        DOCKER_pds01-56d29c0e9d2a6
 herdr session list
-herdr --session "pds02_DOCKER"       #
-herdr --session "$(hostname -s)"     #
-herdr session attach "$(hostname -s)"  # OR: herdr --session work
-herdr --session pds01   # run this specifically when landing on pds01
-herdr --session pds02   # ...pds02
-herdr server stop "$(hostname -s)"    #
-herdr server stop   # <name>
-herdr server delete   # <name>
+herdr   session stop   DOCKER_pds01
+herdr   session delete DOCKER_pds01    # remove the session (state, socket, directory)
+herdr --session        DOCKER_pds01    # launch or resume/attach
+herdr --session "pds02_DOCKER"         #
+herdr --session "$(hostname -s)"       #
+herdr   session attach "$(hostname -s)"  # OR: herdr --session work
+herdr   session stop "$(hostname -s)"    #
+herdr   server stop   # <name>
 tasklist | grep -E "cmd|bash" ▪ works with cygwin, process list
 tasklist | wc -l  ▪ process list
 taskkill /F /PID PID ▪ kill process

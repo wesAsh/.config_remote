@@ -2704,3 +2704,53 @@ ww_show_os_info_hardware_etc() {
     du -sh /             #–  Shows disk usage for a specific directory.
 }
 
+# === wsl#ai_notes#terminal#herdr#herdr_funcs_2026_07.sh ===
+_herdr_run() {
+    local c0 cok cbad cdim
+    if [ -t 1 ]; then c0=$'\033[0m' cok=$'\033[32m' cbad=$'\033[31m' cdim=$'\033[2m'; fi
+    printf '%s$ %s%s\n' "$cdim" "$*" "$c0"
+    "$@"
+    local rc=$?
+    if [ "$rc" -eq 0 ]; then
+        printf '%s✓ ok%s\n' "$cok" "$c0"
+    else
+        printf '%s✗ failed (exit %d)%s\n' "$cbad" "$rc" "$c0"
+    fi
+    return "$rc"
+}
+_herdr_pick() {
+    local prompt=${1:-session} line list
+    list=$(herdr session list 2>/dev/null | awk 'NR>1 && NF')
+    [ -z "$list" ] && { echo "no herdr sessions" >&2; return 1; }
+    if command -v fzf >/dev/null 2>&1; then
+        line=$(printf '%s\n' "$list" | fzf --prompt="$prompt> " \
+                   --height=40% --reverse --with-nth=1,2) || return 1
+    else
+        local names PS3="$prompt (number)? "
+        names=$(printf '%s\n' "$list" | awk '{print $1}')
+        select line in $names; do [ -n "$line" ] && break; done
+    fi
+    [ -n "$line" ] && awk '{print $1}' <<<"$line"
+}
+_herdr_attach()  { local n=$1; [ -z "$n" ] && { n=$(_herdr_pick attach) || return; }; _herdr_run herdr session attach "$n"; }
+_herdr_stop() { local n=$1; [ -z "$n" ] && { n=$(_herdr_pick stop)   || return; }; _herdr_run herdr session stop   "$n"; }
+_herdr_delete()  {
+    local n=$1; [ -z "$n" ] && { n=$(_herdr_pick delete) || return; }
+    read -r -p "delete session '$n'? [y/N] " a
+    [[ $a == [yY] ]] && _herdr_run herdr session delete "$n"
+}
+herdr_select() {
+    clear -x
+    docker ps
+    herdr session list
+    echo
+    local action
+    read -r -n1 -p "[a]ttach  [s]top  [d]elete ? " action; echo
+    case $action in
+        a|A) _herdr_attach ;;
+        s|S) _herdr_stop ;;
+        d|D) _herdr_delete ;;
+        *)   echo cancelled ;;
+    esac
+}
+
